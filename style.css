@@ -1,0 +1,74 @@
+body{
+font-family:Segoe UI;
+margin:0;
+background:#eef2f6;
+color:#222;
+}
+
+header{
+background:#1e88e5;
+color:white;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.planner{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.inputs{
+display:flex;
+gap:10px;
+}
+
+input{
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+flex:1;
+}
+
+button{
+padding:10px 15px;
+border:none;
+background:#1e88e5;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.results,.departures,.map{
+margin:20px;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.route{
+border-bottom:1px solid #ddd;
+padding:10px 0;
+}
+
+.badge{
+background:#1e88e5;
+color:white;
+padding:4px 8px;
+border-radius:4px;
+font-weight:bold;
+}
+
+.dark{
+background:#121212;
+color:white;
+}
+
+.dark header{
+background:#000;
+}
