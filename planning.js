@@ -2,29 +2,18 @@ function buildGraph(){
 
 let graph = {}
 
-routes.forEach(route => {
+routes.forEach(route=>{
 
-for(let i = 0; i < route.stops.length - 1; i++){
+for(let i=0;i<route.stops.length-1;i++){
 
-let from = route.stops[i]
-let to = route.stops[i+1]
+let a = route.stops[i]
+let b = route.stops[i+1]
 
-if(!graph[from]) graph[from] = []
-if(!graph[to]) graph[to] = []
+if(!graph[a]) graph[a]=[]
+if(!graph[b]) graph[b]=[]
 
-// forward direction
-graph[from].push({
-to: to,
-route: route.number,
-time: 5
-})
-
-// reverse direction
-graph[to].push({
-to: from,
-route: route.number,
-time: 5
-})
+graph[a].push({to:b,route:route.number})
+graph[b].push({to:a,route:route.number})
 
 }
 
@@ -33,86 +22,74 @@ time: 5
 return graph
 }
 
-
 function planJourney(){
 
-let start = document.getElementById("startStop").value.trim()
-let end = document.getElementById("endStop").value.trim()
+let start=document.getElementById("startStop").value.trim()
+let end=document.getElementById("endStop").value.trim()
 
-let results = document.getElementById("results")
-results.innerHTML = ""
+let results=document.getElementById("results")
+results.innerHTML=""
 
-if(!start || !end){
-results.innerHTML = "Please enter both stops."
+if(!start||!end){
+results.innerHTML="Enter both stops."
 return
 }
 
-let graph = buildGraph()
+let graph=buildGraph()
 
 if(!graph[start]){
-results.innerHTML = "Start stop not found."
+results.innerHTML="Start stop not found."
 return
 }
 
 if(!graph[end]){
-results.innerHTML = "Destination stop not found."
+results.innerHTML="Destination stop not found."
 return
 }
 
-let queue = [[0,start,[]]]
-let visited = {}
+let queue=[[start,[]]]
+let visited=new Set()
 
 while(queue.length){
 
-queue.sort((a,b)=>a[0]-b[0])
+let [stop,path]=queue.shift()
 
-let [time,node,path] = queue.shift()
-
-if(node === end){
+if(stop===end){
 displayJourney(path)
 return
 }
 
-if(visited[node]) continue
-visited[node] = true
+if(visited.has(stop)) continue
+visited.add(stop)
 
-let edges = graph[node] || []
-
-edges.forEach(edge => {
+for(let edge of graph[stop]){
 
 queue.push([
-time + edge.time,
 edge.to,
-[...path,{from:node,to:edge.to,route:edge.route}]
+[...path,{from:stop,to:edge.to,route:edge.route}]
 ])
 
-})
+}
 
 }
 
-results.innerHTML = "No route found."
+results.innerHTML="No route found."
 }
-
 
 function displayJourney(path){
 
-let div = document.getElementById("results")
-div.innerHTML = ""
+let results=document.getElementById("results")
+results.innerHTML=""
 
-if(path.length === 0){
-div.innerHTML = "You are already at the destination."
-return
-}
+path.forEach(step=>{
 
-path.forEach(step => {
+let div=document.createElement("div")
 
-let el = document.createElement("div")
-
-el.innerHTML =
-`Take <span class="routeBadge">${step.route}</span> 
+div.innerHTML=
+`Take <span class="routeBadge">${step.route}</span>
 from <b>${step.from}</b> → <b>${step.to}</b>`
 
-div.appendChild(el)
+results.appendChild(div)
 
 })
 
