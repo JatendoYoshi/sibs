@@ -11,14 +11,21 @@
 
   <h1>Sunshine Islands Bus Planner</h1>
 
-  <!-- Journey Planner -->
-  <section>
-    <h2>Plan Your Journey</h2>
-    <input type="text" id="startStop" placeholder="Start Stop">
-    <input type="text" id="endStop" placeholder="Destination Stop">
-    <button onclick="planJourney()">Plan Journey</button>
-    <div id="results"></div>
-  </section>
+<section>
+  <h2>Plan Your Journey</h2>
+  <input type="text" id="startStop" placeholder="Start Stop">
+  <input type="text" id="endStop" placeholder="Destination Stop">
+  <input type="number" id="departHour" placeholder="Hour (0-23)" min="0" max="23">
+  <input type="number" id="departMin" placeholder="Minute (0-59)" min="0" max="59">
+  <button type="button" onclick="planJourneyAtTime()">Plan Journey</button>
+  <div id="results"></div>
+</section>
+
+
+    <!-- Departure time -->
+<input type="number" id="departHour" placeholder="Hour (0-23)" min="0" max="23">
+<input type="number" id="departMin" placeholder="Minute (0-59)" min="0" max="59">
+<button onclick="planJourneyAtTime()">Plan Journey</button>
 
   <!-- Live Departures -->
   <section>
@@ -28,10 +35,7 @@
     <div id="departureBoard"></div>
   </section>
 
-  <!-- Departure time -->
-<input type="number" id="departHour" placeholder="Hour (0-23)" min="0" max="23">
-<input type="number" id="departMin" placeholder="Minute (0-59)" min="0" max="59">
-<button onclick="planJourneyAtTime()">Plan Journey</button>
+
 
 
 </div>
