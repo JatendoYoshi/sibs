@@ -1,3 +1,14 @@
+function getInterval(route){
+
+let hour = new Date().getHours()
+
+if(hour>=7 && hour<=9) return route.timetable.peak
+if(hour>=16 && hour<=18) return route.timetable.peak
+
+return route.timetable.offpeak
+
+}
+
 function buildGraph(){
 
 let graph={}
@@ -12,8 +23,17 @@ let b=route.stops[i+1]
 if(!graph[a]) graph[a]=[]
 if(!graph[b]) graph[b]=[]
 
-graph[a].push({stop:b,route:route.number})
-graph[b].push({stop:a,route:route.number})
+graph[a].push({
+to:b,
+route:route.number,
+wait:getInterval(route)
+})
+
+graph[b].push({
+to:a,
+route:route.number,
+wait:getInterval(route)
+})
 
 }
 
@@ -26,67 +46,58 @@ function planJourney(){
 
 let start=document.getElementById("startStop").value.trim()
 let end=document.getElementById("endStop").value.trim()
-
 let results=document.getElementById("results")
-results.innerHTML=""
 
-if(!start||!end){
-results.innerHTML="Please enter both stops."
-return
-}
+results.innerHTML=""
 
 let graph=buildGraph()
 
 if(!graph[start]){
-results.innerHTML="Start stop not recognised."
+results.innerHTML="Start stop not found."
 return
 }
 
 if(!graph[end]){
-results.innerHTML="Destination stop not recognised."
+results.innerHTML="Destination stop not found."
 return
 }
 
-let queue=[[start,[]]]
-let visited=new Set()
+let queue=[[start,0,[]]]
+let visited={}
 
 while(queue.length){
 
-let [current,path]=queue.shift()
+queue.sort((a,b)=>a[1]-b[1])
 
-if(current===end){
-displayJourney(path)
+let [stop,time,path]=queue.shift()
+
+if(stop===end){
+displayJourney(path,time)
 return
 }
 
-if(visited.has(current)) continue
-visited.add(current)
+if(visited[stop]) continue
+visited[stop]=true
 
-let edges=graph[current]||[]
-
-edges.forEach(edge=>{
+for(let edge of graph[stop]){
 
 queue.push([
-edge.stop,
-[...path,{from:current,to:edge.stop,route:edge.route}]
+edge.to,
+time+edge.wait,
+[...path,{from:stop,to:edge.to,route:edge.route}]
 ])
 
-})
+}
 
 }
 
 results.innerHTML="No route found."
+
 }
 
-function displayJourney(path){
+function displayJourney(path,time){
 
 let results=document.getElementById("results")
-results.innerHTML=""
-
-if(path.length===0){
-results.innerHTML="You are already there."
-return
-}
 
 path.forEach(step=>{
 
@@ -94,10 +105,15 @@ let div=document.createElement("div")
 
 div.innerHTML=
 `Take <span class="routeBadge">${step.route}</span>
-from <b>${step.from}</b> → <b>${step.to}</b>`
+${step.from} → ${step.to}`
 
 results.appendChild(div)
 
 })
+
+let timeDiv=document.createElement("div")
+timeDiv.innerHTML=`<b>Total estimated time: ${time} minutes</b>`
+
+results.appendChild(timeDiv)
 
 }
