@@ -1,46 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<title>Sunshine Islands Transit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunshine Islands Bus App</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<div class="container">
 
-<header>
-<h1>🚌 Sunshine Islands Transit</h1>
-<button onclick="toggleTheme()">Toggle Theme</button>
-</header>
+  <h1>Sunshine Islands Bus Planner</h1>
 
-<section class="planner">
+  <!-- Journey Planner -->
+  <section>
+    <h2>Plan Your Journey</h2>
+    <input type="text" id="startStop" placeholder="Start Stop" oninput="autocompleteStart()">
+    <input type="text" id="endStop" placeholder="Destination Stop" oninput="autocompleteEnd()">
+    <button onclick="planJourney()">Plan Journey</button>
+    <div id="results"></div>
+  </section>
 
-<h2>Journey Planner</h2>
+  <!-- Live Departures -->
+  <section>
+    <h2>Live Departures</h2>
+    <input type="text" id="stopBoard" placeholder="Enter Stop">
+    <button onclick="showDepartures()">Show Departures</button>
+    <div id="departureBoard"></div>
+  </section>
 
-<input id="startStop" placeholder="Start stop">
-<input id="endStop" placeholder="Destination">
-
-<button onclick="planJourney()">Plan Journey</button>
-
-<div id="results"></div>
-
-</section>
-
-<section class="departures">
-
-<h2>Live Departures</h2>
-
-<input id="stopBoard" placeholder="Enter stop name">
-<button onclick="showDepartures()">Show Departures</button>
-
-<div id="departureBoard"></div>
-
-</section>
+</div>
 
 <script src="routes.js"></script>
 <script src="planner.js"></script>
 <script src="app.js"></script>
-
+<script src="autocomplete.js"></script>
 </body>
 </html>
