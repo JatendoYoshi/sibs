@@ -1,19 +1,19 @@
 function buildGraph(){
 
-let graph = {}
+let graph={}
 
 routes.forEach(route=>{
 
 for(let i=0;i<route.stops.length-1;i++){
 
-let a = route.stops[i]
-let b = route.stops[i+1]
+let a=route.stops[i]
+let b=route.stops[i+1]
 
 if(!graph[a]) graph[a]=[]
 if(!graph[b]) graph[b]=[]
 
-graph[a].push({to:b,route:route.number})
-graph[b].push({to:a,route:route.number})
+graph[a].push({stop:b,route:route.number})
+graph[b].push({stop:a,route:route.number})
 
 }
 
@@ -31,19 +31,19 @@ let results=document.getElementById("results")
 results.innerHTML=""
 
 if(!start||!end){
-results.innerHTML="Enter both stops."
+results.innerHTML="Please enter both stops."
 return
 }
 
 let graph=buildGraph()
 
 if(!graph[start]){
-results.innerHTML="Start stop not found."
+results.innerHTML="Start stop not recognised."
 return
 }
 
 if(!graph[end]){
-results.innerHTML="Destination stop not found."
+results.innerHTML="Destination stop not recognised."
 return
 }
 
@@ -52,24 +52,26 @@ let visited=new Set()
 
 while(queue.length){
 
-let [stop,path]=queue.shift()
+let [current,path]=queue.shift()
 
-if(stop===end){
+if(current===end){
 displayJourney(path)
 return
 }
 
-if(visited.has(stop)) continue
-visited.add(stop)
+if(visited.has(current)) continue
+visited.add(current)
 
-for(let edge of graph[stop]){
+let edges=graph[current]||[]
+
+edges.forEach(edge=>{
 
 queue.push([
-edge.to,
-[...path,{from:stop,to:edge.to,route:edge.route}]
+edge.stop,
+[...path,{from:current,to:edge.stop,route:edge.route}]
 ])
 
-}
+})
 
 }
 
@@ -80,6 +82,11 @@ function displayJourney(path){
 
 let results=document.getElementById("results")
 results.innerHTML=""
+
+if(path.length===0){
+results.innerHTML="You are already there."
+return
+}
 
 path.forEach(step=>{
 
