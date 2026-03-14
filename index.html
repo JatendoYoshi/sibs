@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sunshine Islands Transit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+<h1>🚌 Sunshine Islands Transit</h1>
+<div class="modeToggle" onclick="toggleMode()">🌙</div>
+</header>
+
+<section class="planner">
+
+<div class="inputs">
+
+<input id="startInput" placeholder="Start stop">
+<input id="endInput" placeholder="Destination">
+
+<button onclick="planJourney()">Find Route</button>
+
+</div>
+
+<div id="suggestions"></div>
+
+</section>
+
+<section class="results">
+
+<h2>Journey Results</h2>
+<div id="journeyOutput"></div>
+
+</section>
+
+<section class="departures">
+
+<h2>Live Departures</h2>
+<input id="stopBoardInput" placeholder="Enter stop name">
+<button onclick="showDepartures()">Show Departures</button>
+
+<div id="departureBoard"></div>
+
+</section>
+
+<section class="map">
+
+<h2>Route Map</h2>
+<canvas id="mapCanvas"></canvas>
+
+</section>
+
+<script src="routes.js"></script>
+<script src="map.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
