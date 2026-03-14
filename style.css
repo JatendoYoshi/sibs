@@ -1,8 +1,7 @@
 body{
 font-family:Segoe UI;
 margin:0;
-background:#eef2f6;
-color:#222;
+background:#eef3f7;
 }
 
 header{
@@ -11,27 +10,21 @@ color:white;
 padding:20px;
 display:flex;
 justify-content:space-between;
-align-items:center;
 }
 
-.planner{
+section{
 background:white;
-padding:20px;
 margin:20px;
+padding:20px;
 border-radius:10px;
 box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-.inputs{
-display:flex;
-gap:10px;
-}
-
 input{
 padding:10px;
+margin:5px;
 border-radius:6px;
 border:1px solid #ccc;
-flex:1;
 }
 
 button{
@@ -43,20 +36,7 @@ border-radius:6px;
 cursor:pointer;
 }
 
-.results,.departures,.map{
-margin:20px;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-.route{
-border-bottom:1px solid #ddd;
-padding:10px 0;
-}
-
-.badge{
+.routeBadge{
 background:#1e88e5;
 color:white;
 padding:4px 8px;
@@ -65,10 +45,10 @@ font-weight:bold;
 }
 
 .dark{
-background:#121212;
+background:#111;
 color:white;
 }
 
-.dark header{
-background:#000;
+.dark section{
+background:#222;
 }
