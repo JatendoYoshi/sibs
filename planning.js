@@ -4,14 +4,15 @@ let graph={}
 
 routes.forEach(route=>{
 
-let stops=["Central","Southern","Northern Interchange","Sunshine Station","Norton Town Center"]
+for(let i=0;i<route.stops.length-1;i++){
 
-for(let i=0;i<stops.length-1;i++){
+let from=route.stops[i]
+let to=route.stops[i+1]
 
-if(!graph[stops[i]]) graph[stops[i]]=[]
+if(!graph[from]) graph[from]=[]
 
-graph[stops[i]].push({
-to:stops[i+1],
+graph[from].push({
+to:to,
 route:route.number,
 time:5
 })
@@ -25,8 +26,8 @@ return graph
 
 function planJourney(){
 
-let start=document.getElementById("startStop").value
-let end=document.getElementById("endStop").value
+let start=document.getElementById("startStop").value.trim()
+let end=document.getElementById("endStop").value.trim()
 
 let graph=buildGraph()
 
@@ -47,15 +48,17 @@ return
 if(visited[node]) continue
 visited[node]=true
 
-for(let edge of (graph[node]||[])){
+let edges=graph[node]||[]
+
+edges.forEach(edge=>{
 
 queue.push([
 time+edge.time,
 edge.to,
-[...path,edge]
+[...path,{from:node,to:edge.to,route:edge.route}]
 ])
 
-}
+})
 
 }
 
@@ -74,7 +77,7 @@ let el=document.createElement("div")
 
 el.innerHTML=
 `Take <span class="routeBadge">${step.route}</span>
-from ${step.from||""} → ${step.to}`
+from ${step.from} → ${step.to}`
 
 div.appendChild(el)
 

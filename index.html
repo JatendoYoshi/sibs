@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <title>Sunshine Islands Transit</title>
@@ -10,7 +11,7 @@
 
 <header>
 <h1>🚌 Sunshine Islands Transit</h1>
-<button onclick="toggleTheme()">🌙</button>
+<button onclick="toggleTheme()">Toggle Theme</button>
 </header>
 
 <section class="planner">
@@ -30,24 +31,15 @@
 
 <h2>Live Departures</h2>
 
-<input id="stopBoard" placeholder="Enter stop">
-<button onclick="showDepartures()">Show</button>
+<input id="stopBoard" placeholder="Enter stop name">
+<button onclick="showDepartures()">Show Departures</button>
 
 <div id="departureBoard"></div>
 
 </section>
 
-<section class="map">
-
-<h2>Network Map</h2>
-
-<canvas id="mapCanvas"></canvas>
-
-</section>
-
 <script src="routes.js"></script>
 <script src="planner.js"></script>
-<script src="map.js"></script>
 <script src="app.js"></script>
 
 </body>

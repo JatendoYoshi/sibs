@@ -1,28 +1,40 @@
 function showDepartures(){
 
-let stop=document.getElementById("stopBoard").value
+let stop=document.getElementById("stopBoard").value.trim()
 let board=document.getElementById("departureBoard")
 
 board.innerHTML=""
 
-let now=new Date()
+let servicesFound=false
 
 routes.forEach(route=>{
 
-for(let i=0;i<5;i++){
+if(route.stops.includes(stop)){
 
-let time=new Date(now.getTime()+i*route.interval*60000)
+servicesFound=true
+
+for(let i=1;i<=5;i++){
+
+let minutes=i*route.interval
 
 let el=document.createElement("div")
 
 el.innerHTML=
-`Bus <b>${route.number}</b> – ${time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`
+`Bus <b>${route.number}</b> – ${minutes} mins`
 
 board.appendChild(el)
 
 }
 
+}
+
 })
+
+if(!servicesFound){
+
+board.innerHTML="No buses found at this stop."
+
+}
 
 }
 
