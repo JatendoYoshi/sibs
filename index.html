@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Sunshine Islands Transit</title>
@@ -10,36 +10,28 @@
 
 <header>
 <h1>🚌 Sunshine Islands Transit</h1>
-<div class="modeToggle" onclick="toggleMode()">🌙</div>
+<button onclick="toggleTheme()">🌙</button>
 </header>
 
 <section class="planner">
 
-<div class="inputs">
+<h2>Journey Planner</h2>
 
-<input id="startInput" placeholder="Start stop">
-<input id="endInput" placeholder="Destination">
+<input id="startStop" placeholder="Start stop">
+<input id="endStop" placeholder="Destination">
 
-<button onclick="planJourney()">Find Route</button>
+<button onclick="planJourney()">Plan Journey</button>
 
-</div>
-
-<div id="suggestions"></div>
-
-</section>
-
-<section class="results">
-
-<h2>Journey Results</h2>
-<div id="journeyOutput"></div>
+<div id="results"></div>
 
 </section>
 
 <section class="departures">
 
 <h2>Live Departures</h2>
-<input id="stopBoardInput" placeholder="Enter stop name">
-<button onclick="showDepartures()">Show Departures</button>
+
+<input id="stopBoard" placeholder="Enter stop">
+<button onclick="showDepartures()">Show</button>
 
 <div id="departureBoard"></div>
 
@@ -47,12 +39,14 @@
 
 <section class="map">
 
-<h2>Route Map</h2>
+<h2>Network Map</h2>
+
 <canvas id="mapCanvas"></canvas>
 
 </section>
 
 <script src="routes.js"></script>
+<script src="planner.js"></script>
 <script src="map.js"></script>
 <script src="app.js"></script>
 
