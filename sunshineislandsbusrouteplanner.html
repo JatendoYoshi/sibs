@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sunshine Islands Planner — Full Network (Parsed)</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<title>Sunshine Islands Planner</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
 body{margin:0;font-family:Inter;background:#020617;color:white}
 header{padding:20px;text-align:center;font-size:26px;background:#0f172a}
@@ -18,25 +19,29 @@ button{background:#22c55e;font-weight:bold}
 .card{background:#1e293b;padding:16px;border-radius:14px;margin-top:15px}
 </style>
 </head>
+
 <body>
-<header>🚍 Sunshine Islands Planner — Full Network</header>
+<header>🚍 Sunshine Islands Bus Planner</header>
+
 <div class="container">
-<div class="grid">
-<input list="stops" id="start" placeholder="Start stop">
-<input list="stops" id="end" placeholder="Destination">
+  <div class="grid">
+    <input list="stops" id="start" placeholder="Start stop">
+    <input list="stops" id="end" placeholder="Destination">
+  </div>
+
+  <datalist id="stops"></datalist>
+  <button onclick="plan()">Find Route</button>
+
+  <div id="result"></div>
+  <div id="map"></div>
 </div>
-<datalist id="stops"></datalist>
-<button onclick="plan()">Find Route</button>
-<div id="result"></div>
-<div id="map"></div>
-</div>
+
 <script>
 
-// ================= FULL RAW DATA =================
-// 🔴 PASTE YOUR ENTIRE EXCEL HERE (ALL OF IT)
-const rawData = `PASTE EVERYTHING HERE EXACTLY`;
+// ================== PASTE FULL EXCEL DATA HERE ==================
+const rawData = `PASTE YOUR FULL EXCEL DATA HERE`;
 
-// ================= SMART PARSER =================
+// ================== PARSER ==================
 function parseData(tsv){
   const lines = tsv.split("\n").slice(1);
   const stops = [];
@@ -53,20 +58,14 @@ function parseData(tsv){
       const cell = cols[i];
       if(!cell) continue;
 
-      // split multiple routes
-      const entries = cell.split(",");
-
-      entries.forEach(entry=>{
+      cell.split(",").forEach(entry=>{
         entry = entry.trim();
         if(!entry) return;
 
-        // remove brackets but keep content
         entry = entry.replace(/[()]/g,"");
 
         const parts = entry.split(" ");
         const route = parts[0];
-
-        // everything else = direction / variant info
         const direction = parts.slice(1).join(" ") || "";
 
         if(!route) return;
@@ -86,7 +85,7 @@ function parseData(tsv){
 
 const stopsData = parseData(rawData);
 
-// ================= BUILD ROUTES =================
+// ================== BUILD ROUTES ==================
 const routes = {};
 stopsData.forEach(s=>{
   Object.keys(s.routes).forEach(r=>{
@@ -95,73 +94,81 @@ stopsData.forEach(s=>{
   });
 });
 
-// ================= GRAPH =================
-const graph={};
-Object.entries(routes).forEach(([r,stops])=>{
-  stops.forEach((s,i)=>{
-    if(!graph[s]) graph[s]=[];
-    if(stops[i+1]) graph[s].push({to:stops[i+1],route:r});
-    if(stops[i-1]) graph[s].push({to:stops[i-1],route:r});
-  });
-});
+// ================== WORKING ROUTING ==================
+function findRoute(start, end){
 
-// ================= ROUTING =================
-function shortest(start,end){
-  const dist={},prev={},pq=[];
-  Object.keys(graph).forEach(n=>dist[n]=Infinity);
-  dist[start]=0;
-  pq.push({node:start,d:0});
+  if(start === end) return [];
 
-  while(pq.length){
-    pq.sort((a,b)=>a.d-b.d);
-    const {node}=pq.shift();
-    if(node===end) break;
+  const queue = [{
+    stop: start,
+    path: [],
+    route: null
+  }];
 
-    (graph[node]||[]).forEach(e=>{
-      const nd=dist[node]+1+(prev[node]&&prev[node].route!==e.route?0.5:0);
-      if(nd<dist[e.to]){
-        dist[e.to]=nd;
-        prev[e.to]={from:node,route:e.route};
-        pq.push({node:e.to,d:nd});
-      }
-    });
+  const visited = new Set();
+
+  while(queue.length){
+    const current = queue.shift();
+    const key = current.stop + "|" + current.route;
+
+    if(visited.has(key)) continue;
+    visited.add(key);
+
+    if(current.stop === end){
+      return current.path;
+    }
+
+    const stopObj = stopsData.find(s=>s.stop === current.stop);
+    if(!stopObj) continue;
+
+    for(let route in stopObj.routes){
+
+      const nextStops = routes[route] || [];
+
+      nextStops.forEach(nextStop=>{
+        queue.push({
+          stop: nextStop,
+          route: route,
+          path: [...current.path, {
+            stop: nextStop,
+            route: route
+          }]
+        });
+      });
+
+    }
   }
 
-  const path=[];
-  let cur=end;
-  while(prev[cur]){
-    path.unshift({stop:cur,route:prev[cur].route});
-    cur=prev[cur].from;
-  }
-  return cur===start?path:null;
+  return null;
 }
 
-// ================= MAP =================
+// ================== MAP ==================
 const map=L.map('map').setView([51.5,-0.1],13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let line;
 
-function coord(n){
+function coord(name){
   let h=0;
-  for(let i=0;i<n.length;i++) h=n.charCodeAt(i)+((h<<5)-h);
+  for(let i=0;i<name.length;i++) h=name.charCodeAt(i)+((h<<5)-h);
   return [51.5+(h%100)/5000,-0.1+((h>>3)%100)/5000];
 }
 
 function draw(path,start){
   if(line) map.removeLayer(line);
+
   const pts=[coord(start)];
   path.forEach(p=>pts.push(coord(p.stop)));
+
   line=L.polyline(pts,{weight:5}).addTo(map);
   map.fitBounds(line.getBounds());
 }
 
-// ================= HELPERS =================
+// ================== HELPERS ==================
 function getInfo(stop,route){
-  const s=stopsData.find(x=>x.stop===stop);
-  return s?.routes[route]||{platform:"?",direction:"?"};
+  const s = stopsData.find(x=>x.stop===stop);
+  return s?.routes[route] || {platform:"?",direction:"?"};
 }
 
-// ================= UI =================
 function populate(){
   const dl=document.getElementById('stops');
   stopsData.forEach(s=>{
@@ -171,10 +178,12 @@ function populate(){
   });
 }
 
+// ================== PLAN ==================
 function plan(){
-  const s=document.getElementById('start').value;
-  const e=document.getElementById('end').value;
-  const path=shortest(s,e);
+  const start=document.getElementById('start').value;
+  const end=document.getElementById('end').value;
+
+  const path = findRoute(start,end);
   const res=document.getElementById('result');
 
   if(!path){
@@ -183,22 +192,23 @@ function plan(){
   }
 
   let html="<div class='card'><b>Journey</b><br><br>";
-  let curRoute=null;
+  let currentRoute=null;
 
-  path.forEach(p=>{
-    const info=getInfo(s,p.route);
+  path.forEach(step=>{
+    const info = getInfo(step.stop, step.route);
 
-    if(p.route!==curRoute){
-      html+=`<div><b>${p.route}</b> — Platform ${info.platform} → ${info.direction}</div>`;
-      curRoute=p.route;
+    if(step.route !== currentRoute){
+      html += `<div><b>${step.route}</b> — Platform ${info.platform} → ${info.direction}</div>`;
+      currentRoute = step.route;
     }
 
-    html+=`<div>→ ${p.stop}</div>`;
+    html += `<div>→ ${step.stop}</div>`;
   });
 
-  html+="</div>";
-  res.innerHTML=html;
-  draw(path,s);
+  html += "</div>";
+
+  res.innerHTML = html;
+  draw(path,start);
 }
 
 populate();
