@@ -1,0 +1,2548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SIBS – Sunshine Islands Bus Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --yellow: #F5C200;
+    --yellow-dark: #D4A800;
+    --yellow-light: #FFF8D6;
+    --blue: #3ABDE8;
+    --blue-dark: #1A8CB5;
+    --blue-light: #E8F8FD;
+    --white: #FFFFFF;
+    --bg: #F4F6F9;
+    --text: #1A1A2E;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --card: #FFFFFF;
+    --red: #EF4444;
+    --green: #22C55E;
+    --orange: #F97316;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Noto Sans HK', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ===== TOP NAV ===== */
+  #topnav {
+    background: var(--text);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 32px;
+    text-decoration: none;
+  }
+  .logo-badge {
+    background: var(--yellow);
+    color: var(--text);
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text {
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+    overflow-x: auto;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .nav-btn.active { background: var(--yellow); color: var(--text); font-weight: 700; }
+  .nav-clock {
+    color: var(--yellow);
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+
+  /* ===== MAIN ===== */
+  #main { padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
+
+  /* ===== PAGE HEADER ===== */
+  .page-header {
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .page-title span { color: var(--blue-dark); }
+  .page-sub {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon {
+    width: 28px; height: 28px;
+    background: var(--yellow-light);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ===== GRID ===== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media(max-width:900px) { .grid-4 { grid-template-columns: 1fr 1fr; } }
+  @media(max-width:600px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+  /* ===== STATUS BANNER ===== */
+  .status-banner {
+    background: linear-gradient(135deg, var(--text) 0%, #2d3561 100%);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+  .status-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--yellow);
+  }
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .status-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); animation: pulse 1.5s infinite; }
+  .status-dot.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .status-text { color: #fff; font-size: 13px; }
+  .status-text strong { color: var(--yellow); }
+
+  /* ===== ROUTE TAG ===== */
+  .route-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blue);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    min-width: 44px;
+    letter-spacing: 0.3px;
+  }
+  .route-tag.ftcc { background: var(--blue); }
+  .route-tag.ft { background: #1A5276; }
+  .route-tag.rebc { background: #7B241C; }
+  .route-tag.csb { background: #1E8449; }
+  .route-tag.hzii { background: #6C3483; }
+  .route-tag.sibs { background: #B7950B; }
+
+  /* ===== OPERATOR BADGE ===== */
+  .op-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .op-badge.ftcc { background: #E8F8FD; color: var(--blue-dark); }
+  .op-badge.ft { background: #D6EAF8; color: #1A5276; }
+  .op-badge.rebc { background: #FDEDEC; color: #7B241C; }
+  .op-badge.csb { background: #EAFAF1; color: #1E8449; }
+  .op-badge.hzii { background: #F5EEF8; color: #6C3483; }
+
+  /* ===== ROUTE LIST ===== */
+  .route-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 8px;
+    padding-left: 8px;
+    margin-left: -8px;
+  }
+  .route-item:hover { background: var(--blue-light); }
+  .route-item:last-child { border-bottom: none; }
+  .route-meta { flex: 1; }
+  .route-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .route-via { font-size: 12px; color: var(--text-muted); }
+  .route-info { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .pill {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .pill.fare { background: var(--yellow-light); color: #92640A; }
+  .pill.time { background: #F0F9FF; color: var(--blue-dark); }
+  .pill.service { background: #F0FDF4; color: #15803D; }
+
+  /* ===== FLEET BADGE ===== */
+  .fleet-badge {
+    background: var(--text);
+    color: var(--yellow);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== ARRIVALS BOARD ===== */
+  .arrivals-board {
+    background: var(--text);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 2px solid var(--yellow);
+  }
+  .arrivals-header {
+    background: var(--yellow);
+    padding: 10px 16px;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .arrivals-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 80px 90px 90px;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    align-items: center;
+  }
+  .arrivals-row:last-child { border-bottom: none; }
+  .arrivals-row:hover { background: rgba(255,255,255,0.04); }
+  .arr-route { }
+  .arr-dest { color: #fff; font-size: 13px; font-weight: 600; }
+  .arr-time {
+    color: var(--yellow);
+    font-weight: 800;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .arr-fleet { color: rgba(255,255,255,0.6); font-size: 11px; }
+  .arr-status { font-size: 11px; font-weight: 600; }
+  .arr-status.on-time { color: var(--green); }
+  .arr-status.delayed { color: var(--red); }
+  .arrivals-cols {
+    display: grid;
+    grid-template-columns: 70px 1fr 80px 90px 90px;
+    gap: 8px;
+    padding: 6px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .arrivals-col-label { color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ===== STOP DETAIL ===== */
+  .stop-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .stop-row:last-child { border-bottom: none; }
+  .stop-num {
+    width: 24px; height: 24px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .stop-name { flex: 1; font-weight: 500; }
+  .stop-time { color: var(--blue-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stop-delay { color: var(--red); font-size: 11px; font-weight: 600; }
+
+  /* ===== JOURNEY PLANNER ===== */
+  .planner-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  @media(max-width:700px) { .planner-form { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--yellow); color: var(--text); }
+  .btn-primary:hover { background: var(--yellow-dark); }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-blue:hover { background: var(--blue-dark); }
+  .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--bg); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ===== JOURNEY RESULT ===== */
+  .journey-option {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 12px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .journey-option:hover { border-color: var(--blue); background: var(--blue-light); }
+  .journey-option.best { border-color: var(--yellow); background: var(--yellow-light); }
+  .journey-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+  .journey-badge.fastest { background: var(--green); color: #fff; }
+  .journey-badge.cheapest { background: var(--yellow); color: var(--text); }
+  .journey-badge.direct { background: var(--blue); color: #fff; }
+  .journey-steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .journey-arrow { color: var(--text-muted); }
+  .journey-footer {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .journey-footer strong { color: var(--text); }
+
+  /* ===== TIMETABLE ===== */
+  .timetable-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:700px) { .timetable-grid { grid-template-columns: 1fr; } }
+  .tt-period {
+    padding: 8px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .tt-interval { color: var(--blue-dark); font-weight: 700; }
+
+  /* ===== DIVERSION ===== */
+  .diversion-banner {
+    background: #FEF3C7;
+    border: 1.5px solid #F59E0B;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .diversion-icon { font-size: 16px; flex-shrink: 0; }
+  .diversion-text { font-size: 12px; }
+  .diversion-text strong { font-size: 13px; display: block; margin-bottom: 2px; }
+
+  /* ===== ADMIN ===== */
+  .admin-section { margin-bottom: 28px; }
+  .admin-section-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .admin-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--bg);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .admin-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--bg); }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: var(--border);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+  }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow); }
+
+  /* ===== SEARCH ===== */
+  .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .search-input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--blue); }
+
+  /* ===== STAT CARDS ===== */
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .stat-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+  .stat-accent { color: var(--blue); }
+
+  /* ===== MODAL (route detail) ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    max-width: 700px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky; top: 0;
+    background: #fff;
+    z-index: 1;
+  }
+  .modal-body { padding: 20px; }
+  .modal-close {
+    margin-left: auto;
+    background: var(--bg);
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ===== FLEET LIST ===== */
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .fleet-card {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+  .fleet-num { font-size: 13px; font-weight: 800; color: var(--text); }
+  .fleet-reg { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+  .fleet-route { font-size: 11px; color: var(--blue-dark); font-weight: 600; margin-top: 4px; }
+
+  /* misc */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .text-center { text-align: center; }
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .flex { display: flex; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .flex-wrap { flex-wrap: wrap; }
+  .text-muted { color: var(--text-muted); font-size: 12px; }
+  .text-red { color: var(--red); }
+  .text-green { color: var(--green); }
+  .text-yellow { color: var(--yellow-dark); }
+  .fw-700 { font-weight: 700; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-state .big { font-size: 40px; margin-bottom: 8px; }
+
+  /* HOME hero */
+  .hero {
+    background: linear-gradient(135deg, var(--text) 0%, #16213E 60%, #1A1A2E 100%);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: 'SIBS';
+    position: absolute;
+    right: -10px; bottom: -20px;
+    font-size: 100px;
+    font-weight: 900;
+    color: rgba(245,194,0,0.06);
+    pointer-events: none;
+  }
+  .hero-strip {
+    height: 4px;
+    background: linear-gradient(90deg, var(--yellow) 0%, var(--blue) 100%);
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .hero-title {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .hero-title span { color: var(--yellow); }
+  .hero-sub { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 20px; }
+  .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hero-btn {
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .hero-btn-primary { background: var(--yellow); color: var(--text); }
+  .hero-btn-primary:hover { background: var(--yellow-dark); }
+  .hero-btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1.5px solid rgba(255,255,255,0.2); }
+  .hero-btn-secondary:hover { background: rgba(255,255,255,0.18); }
+
+  /* admin warn */
+  .admin-header {
+    background: linear-gradient(135deg, #1A1A2E, #2d1a5e);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 4px solid var(--yellow);
+  }
+  .admin-header-text { color: #fff; }
+  .admin-header-text strong { color: var(--yellow); font-size: 15px; display: block; }
+  .admin-header-text span { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  /* inline edit */
+  .inline-edit-input {
+    border: 1.5px solid var(--blue);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* live ticker */
+  .ticker-wrap {
+    background: var(--yellow);
+    overflow: hidden;
+    padding: 6px 0;
+    position: relative;
+  }
+  .ticker {
+    display: inline-flex;
+    animation: ticker 40s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    padding: 0 32px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .ticker-item::before { content: '●  '; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  .badge-peak {
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .badge-additional {
+    background: #7C3AED;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .badge-sp {
+    background: var(--text-muted);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .section-divider::before,.section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="tickerEl">
+    <span class="ticker-item">Route 41A – Normal Service</span>
+    <span class="ticker-item">Route 140 – Heavy traffic expected near Northern Interchange during peak hours</span>
+    <span class="ticker-item">Route 171 – Longest daytime route in SIBS, running Long Island ↔ Rainbow Estate</span>
+    <span class="ticker-item">Route 46 – Running at reduced frequency off-peak (1 bus all day)</span>
+    <span class="ticker-item">Route U47 – University shuttle for staff and students only</span>
+    <span class="ticker-item">S1/S2 – Sightseeing open-top service: S1 daytime, S2 evening</span>
+    <span class="ticker-item">Route 41A – Normal Service</span>
+    <span class="ticker-item">Route 140 – Heavy traffic expected near Northern Interchange during peak hours</span>
+    <span class="ticker-item">Route 171 – Longest daytime route in SIBS, running Long Island ↔ Rainbow Estate</span>
+    <span class="ticker-item">Route 46 – Running at reduced frequency off-peak (1 bus all day)</span>
+    <span class="ticker-item">Route U47 – University shuttle for staff and students only</span>
+    <span class="ticker-item">S1/S2 – Sightseeing open-top service: S1 daytime, S2 evening</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <div class="logo-block">
+    <div class="logo-badge">SIBS</div>
+    <span class="logo-text">Bus Information</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home',this)">🏠 Home</button>
+    <button class="nav-btn" onclick="showPage('routes',this)">🗺️ Routes</button>
+    <button class="nav-btn" onclick="showPage('arrivals',this)">🚌 Next Bus</button>
+    <button class="nav-btn" onclick="showPage('planner',this)">📍 Journey Planner</button>
+    <button class="nav-btn" onclick="showPage('fleet',this)">🔢 Fleet</button>
+    <button class="nav-btn" onclick="showPage('admin',this)">⚙️ Admin</button>
+  </div>
+  <div class="nav-clock" id="navClock">00:00:00</div>
+</nav>
+
+<div id="main">
+
+<!-- ===== HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-strip"></div>
+    <div class="hero-title">Sunshine Islands<br/><span>Bus Simulator</span> Network</div>
+    <div class="hero-sub">Real-time arrivals · Journey planning · Fleet tracking · Live service status</div>
+    <div class="hero-btns">
+      <button class="hero-btn hero-btn-primary" onclick="showPage('arrivals',document.querySelectorAll('.nav-btn')[2])">Next Bus</button>
+      <button class="hero-btn hero-btn-secondary" onclick="showPage('planner',document.querySelectorAll('.nav-btn')[3])">Plan Journey</button>
+      <button class="hero-btn hero-btn-secondary" onclick="showPage('routes',document.querySelectorAll('.nav-btn')[1])">View Routes</button>
+    </div>
+  </div>
+
+  <!-- Status banners -->
+  <div id="statusBanners"></div>
+
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="stat-card">
+      <div class="stat-num" id="statRoutes">14</div>
+      <div class="stat-label">Active Routes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num stat-accent" id="statBuses">0</div>
+      <div class="stat-label">Buses On Duty Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--green)" id="statOnTime">–</div>
+      <div class="stat-label">Services On Time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--orange)" id="statDiversions">0</div>
+      <div class="stat-label">Active Diversions</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="icon">🚌</div> Live Arrivals – Quick View</div>
+      <div id="homeArrivals"></div>
+      <div style="margin-top:12px">
+        <button class="btn btn-blue btn-sm" onclick="showPage('arrivals',document.querySelectorAll('.nav-btn')[2])">View All Arrivals →</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">⚠️</div> Service Notices</div>
+      <div id="homeNotices"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ROUTES ===== -->
+<div class="page" id="page-routes">
+  <div class="page-header">
+    <div class="page-title">Route <span>Explorer</span></div>
+    <div class="page-sub">Browse all routes, stops, timetables and today's fleet allocation</div>
+  </div>
+  <div class="search-box">
+    <input class="search-input" id="routeSearch" placeholder="Search routes, stops or destinations…" oninput="filterRoutes()"/>
+    <select class="form-select" style="width:160px" id="opFilter" onchange="filterRoutes()">
+      <option value="">All Operators</option>
+      <option value="ftcc">FTCC</option>
+      <option value="ft">Forever Transit</option>
+      <option value="rebc">REBC</option>
+      <option value="csb">Cityscape Bus</option>
+      <option value="hzii">Horizon Group II</option>
+    </select>
+  </div>
+  <div class="card">
+    <div id="routeList"></div>
+  </div>
+</div>
+
+<!-- ===== ARRIVALS ===== -->
+<div class="page" id="page-arrivals">
+  <div class="page-header">
+    <div class="page-title">Next <span>Bus</span></div>
+    <div class="page-sub">Real-time arrivals based on timetable and daily fleet allocation</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="flex gap-12 items-center flex-wrap">
+      <div class="form-group" style="flex:1;min-width:200px">
+        <label class="form-label">Select Stop</label>
+        <select class="form-select" id="stopSelector" onchange="updateArrivals()">
+          <option value="">– Choose a stop –</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Filter Route</label>
+        <select class="form-select" id="arrRouteFilter" onchange="updateArrivals()">
+          <option value="">All Routes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="arrivalsBoardWrap">
+    <div class="empty-state"><div class="big">🚏</div>Select a stop above to see live arrivals</div>
+  </div>
+</div>
+
+<!-- ===== PLANNER ===== -->
+<div class="page" id="page-planner">
+  <div class="page-header">
+    <div class="page-title">Journey <span>Planner</span></div>
+    <div class="page-sub">Find the fastest or cheapest route between any two stops in SIBS</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title"><div class="icon">📍</div> Plan Your Journey</div>
+    <div class="planner-form">
+      <div class="form-group">
+        <label class="form-label">From</label>
+        <select class="form-select" id="planFrom"><option value="">– Origin –</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">To</label>
+        <select class="form-select" id="planTo"><option value="">– Destination –</option></select>
+      </div>
+      <button class="btn btn-primary" onclick="planJourney()" style="margin-top:2px">Search</button>
+    </div>
+    <div style="margin-top:10px; display:flex; gap:8px; align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="swapStops()">⇅ Swap</button>
+      <span class="text-muted">Tip: results show cheapest & quickest options with interchanges</span>
+    </div>
+  </div>
+  <div id="planResults"></div>
+</div>
+
+<!-- ===== FLEET ===== -->
+<div class="page" id="page-fleet">
+  <div class="page-header">
+    <div class="page-title">Fleet <span>Registry</span></div>
+    <div class="page-sub">Today's allocation across all routes — reshuffled daily within fleet series</div>
+  </div>
+  <div class="tabs" id="fleetTabs">
+    <button class="tab active" onclick="showFleetTab('all',this)">All Buses</button>
+    <button class="tab" onclick="showFleetTab('25',this)">Rt 25</button>
+    <button class="tab" onclick="showFleetTab('41A',this)">Rt 41A</button>
+    <button class="tab" onclick="showFleetTab('140',this)">Rt 140/140P</button>
+    <button class="tab" onclick="showFleetTab('171',this)">Rt 171</button>
+    <button class="tab" onclick="showFleetTab('473',this)">Rt 473</button>
+    <button class="tab" onclick="showFleetTab('S1S2',this)">S1/S2</button>
+    <button class="tab" onclick="showFleetTab('U47',this)">U47</button>
+  </div>
+  <div class="card">
+    <div id="fleetDisplay"></div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="page" id="page-admin">
+  <div class="admin-header">
+    <div style="font-size:24px">⚙️</div>
+    <div class="admin-header-text">
+      <strong>Admin Panel</strong>
+      <span>Manage fleet allocations, diversions, and route changes for the day</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showAdminTab('allocation',this)">Fleet Allocation</button>
+    <button class="tab" onclick="showAdminTab('diversions',this)">Diversions</button>
+    <button class="tab" onclick="showAdminTab('operators',this)">CSB / HZII / REBC</button>
+    <button class="tab" onclick="showAdminTab('timetable',this)">Timetable Override</button>
+  </div>
+
+  <!-- Allocation -->
+  <div id="admin-allocation">
+    <div class="admin-section">
+      <div class="admin-section-title">🔄 Daily Fleet Allocation</div>
+      <p class="text-muted" style="margin-bottom:12px">Buses are auto-shuffled daily within their fleet series. Override any allocation below. One bus can only serve one route at a time.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="reshuffleAll()">🔀 Reshuffle All (New Day)</button>
+        <button class="btn btn-ghost" onclick="resetToDefault()">↺ Reset to Default</button>
+      </div>
+      <div id="allocationTable"></div>
+    </div>
+  </div>
+
+  <!-- Diversions -->
+  <div id="admin-diversions" style="display:none">
+    <div class="admin-section">
+      <div class="admin-section-title">⚠️ Diversion Notices</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Add New Diversion</div>
+        <div class="grid-2" style="gap:12px;margin-bottom:12px">
+          <div class="form-group">
+            <label class="form-label">Route</label>
+            <select class="form-select" id="divRoute">
+              <option value="">Select Route</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="divType">
+              <option value="diversion">Diversion</option>
+              <option value="delay">Expected Delays</option>
+              <option value="cancellation">Partial Cancellation</option>
+              <option value="extra">Extra Services</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Notice Message</label>
+          <input class="form-input" id="divMessage" placeholder="e.g. Route diverted via Central Road due to road works at Sunshine Station"/>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Affected Stops (comma separated)</label>
+          <input class="form-input" id="divStops" placeholder="e.g. Sunshine Station, Central Hospital"/>
+        </div>
+        <button class="btn btn-primary" onclick="addDiversion()">Add Notice</button>
+      </div>
+      <div id="diversionList"></div>
+    </div>
+  </div>
+
+  <!-- Operators -->
+  <div id="admin-operators" style="display:none">
+    <div class="admin-section">
+      <div class="admin-section-title">🚌 Third-Party Operator Schedules</div>
+      <p class="text-muted" style="margin-bottom:16px">Enter fleet numbers and timetable info for CSB, HZII and REBC. These are managed manually by admins.</p>
+      <div class="tabs">
+        <button class="tab active" onclick="showOpTab('csb',this)">Cityscape Bus (CSB)</button>
+        <button class="tab" onclick="showOpTab('hzii',this)">Horizon Group (HZII)</button>
+        <button class="tab" onclick="showOpTab('rebc',this)">REBC</button>
+      </div>
+      <div id="op-csb"><div id="csbTable"></div></div>
+      <div id="op-hzii" style="display:none"><div id="hziiTable"></div></div>
+      <div id="op-rebc" style="display:none"><div id="rebcTable"></div></div>
+    </div>
+  </div>
+
+  <!-- Timetable override -->
+  <div id="admin-timetable" style="display:none">
+    <div class="admin-section">
+      <div class="admin-section-title">🕐 Timetable Overrides</div>
+      <p class="text-muted" style="margin-bottom:16px">Temporarily adjust service intervals for specific routes today.</p>
+      <div id="timetableOverrideList"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ROUTE DETAIL MODAL -->
+<div class="modal-overlay" id="routeModal" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="routeModalContent">
+    <div class="modal-header" id="routeModalHeader"></div>
+    <div class="modal-body" id="routeModalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+// Fleet series definitions
+const FLEET_SERIES = {
+  'S_SMALL': { range: [7, 15], name: 'Open-top (7–15 series)' },
+  'S_900': { range: [954, 990], name: '900s series' },
+  'S_1000': { range: [1000, 1039], name: '1000s series' },
+  'S_1140': { range: [1140, 1189], name: '1140s series' },
+  'S_2210': { range: [2210, 2234], name: '2210s series' },
+  'S_3100': { range: [3100, 3110], name: '3100s series' },
+  'S_3520': { range: [3520, 3529], name: '3520s series' },
+  'S_7730': { range: [7730, 7735], name: '7730s series' },
+};
+
+function getFleetSeries(num) {
+  const n = parseInt(num);
+  if (n >= 7 && n <= 15) return 'S_SMALL';
+  if (n >= 954 && n <= 990) return 'S_900';
+  if (n >= 1000 && n <= 1039) return 'S_1000';
+  if (n >= 1140 && n <= 1189) return 'S_1140';
+  if (n >= 2210 && n <= 2234) return 'S_2210';
+  if (n >= 3100 && n <= 3110) return 'S_3100';
+  if (n >= 3520 && n <= 3529) return 'S_3520';
+  if (n >= 7730 && n <= 7735) return 'S_7730';
+  return null;
+}
+
+// Master fleet list (fleet# → reg)
+const FLEET_MASTER = {
+  // Route 25
+  954:'TL3548',955:'TL5872',956:'TL6660',982:'TN7067',961:'TM1214',
+  963:'TM2911',962:'TM1181',981:'TN6489',
+  // Route 41A
+  1164:'UB6170',1155:'UB1129',1156:'UB1300',1158:'UB2588',
+  1157:'UB1727',1165:'UB7792',1166:'UB8090',
+  2221:'PH3088',2234:'PJ309',2220:'PH2839',
+  2222:'PH3172',2230:'PH8910',2231:'PH9274',
+  // Route 42
+  3101:'TH3181',3103:'TJ5834',3104:'TJ7062',3105:'TK908',3110:'TM8098',
+  // 42A/49A
+  2213:'PG8393',3523:'TP4240',3524:'TP7838',2218:'PH1012',3520:'TN7440',
+  2219:'PH1927',3528:'TR1127',3529:'TR2172',969:'TN370',
+  // Route 46
+  3102:'TJ1433',3109:'TL7456',3100:'TH308',
+  // Route 47
+  2210:'PG7818',2211:'PG8025',2223:'PH3681',2227:'PH6188',
+  2229:'PH8736',2225:'PH4710',2226:'PH4944',
+  2232:'PH9491',2233:'PH9739',2224:'PH3923',
+  // Route 140/140P
+  1018:'VM1401',1019:'VM3082',1020:'VM3808',1021:'VM4123',1022:'VM4871',
+  1034:'VP5699',1036:'VP2818',1037:'VP4003',1038:'VP6016',1039:'VP6960',
+  1001:'VH9082',1002:'VH9771',1003:'VJ4079',1004:'VJ4472',1005:'VJ5972',
+  1006:'VJ6229',1007:'VK2655',1008:'VK3053',1009:'VK7100',1030:'VN9222',
+  1000:'VH8707',1017:'VL9682',1147:'UA1372',1160:'UB3928',1161:'UB3929',
+  1162:'UB4208',1180:'UC9327',1181:'UD140',
+  959:'TL8820',960:'TM290',978:'TN5125',979:'TN5363',990:'TP9436',
+  1163:'UB4817',1148:'UA1867',1146:'UA936',
+  // Route 142
+  1183:'UD142',1168:'UB9111',3107:'TK4032',1167:'UB8562',1159:'UB2981',
+  2228:'PH6303',1169:'UC307',1189:'UF2450',
+  // Route 148/141P
+  1176:'UC4241',1177:'UC7806',1178:'UC8202',1179:'UC8933',1185:'UE8280',
+  1186:'UE8346',1173:'UC2482',1184:'UD148',1175:'UC3236',1149:'UA2088',
+  1151:'UA6277',1152:'UA6794',1174:'UC2980',1143:'TZ8361',
+  1182:'UD141',1153:'UA8661',1150:'UA5919',970:'TN1880',
+  // Route 171
+  1031:'VP3440',1032:'VP3717',1033:'VP5596',1035:'VP2807',
+  957:'TL7839',973:'TN3067',968:'TM7088',980:'TN6110',983:'TN7622',
+  1023:'VM5619',984:'TN8432',1011:'VL3650',1012:'VL4277',1013:'VL6412',
+  1028:'VN1806',1029:'VN4771',1024:'VM5643',958:'TL8645',972:'TN2632',
+  // Route 246X
+  1172:'UC1491',1170:'UC1094',1171:'UC1228',3108:'TK7343',
+  // Route 473
+  1142:'TZ8288',1154:'UA9726',2217:'PG9608',1187:'UE8441',1188:'UE9981',
+  2214:'PG8771',2215:'PG9213',2216:'PG9602',1145:'UA241',
+  1140:'TZ3829',1144:'TZ9370',1141:'TZ4415',
+  // S1/S2
+  7:'HB9230',8:'HC2341',9:'HC6583',
+  // U47
+  7730:'ZE7321',7732:'ZE9616',7733:'ZF915',7735:'ZF3180',
+  7731:'ZE9220',7734:'ZF2182',
+};
+
+// Route definitions
+const ROUTES = [
+  {
+    id:'25', name:'Route 25', operator:'ft',
+    from:'Long Island Ferry Pier', to:"Container's Island Bus Terminus",
+    via:'Northern, Dove Island, Hospital Island',
+    journey:'19–24 min', fare:'$5.4', service:'05:30–00:30', interval:'5–30 min',
+    zone:'Zone 1', type:'inner',
+    color:'#1A5276',
+    timetable:[
+      {dir:"To Container's Island", periods:[
+        {hours:'05:30–07:00',interval:'10–15 min'},
+        {hours:'07:00–09:00',interval:'7–10 min'},
+        {hours:'09:00–20:00',interval:'10–15 min'},
+        {hours:'20:00–00:30',interval:'15–20 min'},
+      ]},
+      {dir:'To Long Island Ferry Pier', periods:[
+        {hours:'05:30–07:00',interval:'10–15 min'},
+        {hours:'07:00–09:00',interval:'7–10 min'},
+        {hours:'09:00–20:00',interval:'10–15 min'},
+        {hours:'20:00–00:30',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Long Island Ferry Pier','Long Island East','Dove Estate','Dove Hill',
+      'Hospital Island Praya Road','Addi City','Timelapse Mall',
+      'Western Harbour Tunnel Interchange','Northern','Maple Lane',
+      "Container's Island Bus Terminus"
+    ],
+    fleet:[
+      {num:954,type:'regular'},{num:955,type:'regular'},{num:956,type:'regular'},
+      {num:982,type:'regular'},{num:961,type:'regular'},{num:963,type:'regular'},
+      {num:962,type:'regular'},{num:981,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'41A', name:'Route 41A', operator:'ftcc',
+    from:'Northern Beach', to:'Sunshine Pier',
+    via:'Norton Town Center, Northern Interchange, Central, Southern',
+    journey:'18–20 min', fare:'$5.4', service:'05:30–00:30', interval:'5–30 min',
+    zone:'Zone 4', type:'inner',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'To Northern Beach', periods:[
+        {hours:'05:40–07:00',interval:'10–15 min'},
+        {hours:'07:00–17:30',interval:'8–10 min'},
+        {hours:'17:30–19:00',interval:'5–8 min'},
+        {hours:'19:00–23:00',interval:'10–12 min'},
+        {hours:'23:00–00:30',interval:'15 min'},
+      ]},
+      {dir:'To Sunshine Pier', periods:[
+        {hours:'05:30–07:00',interval:'10–15 min'},
+        {hours:'07:00–09:00',interval:'5–8 min'},
+        {hours:'09:00–15:30',interval:'7–10 min'},
+        {hours:'15:30–19:00',interval:'5–8 min'},
+        {hours:'19:00–23:00',interval:'10–12 min'},
+        {hours:'23:00–00:30',interval:'15 min'},
+      ]},
+    ],
+    stops:[
+      'Northern Beach','Northern Beach Estate','Norton Town Center',
+      'Norton Road','Panorama Heights','Northern Interchange',
+      'Central Hospital','Maple Lane','Sunshine Station','Southern',
+      'Sunshine Pier'
+    ],
+    fleet:[
+      {num:1164,type:'regular'},{num:1155,type:'regular'},{num:1156,type:'regular'},
+      {num:1158,type:'regular'},{num:2221,type:'regular'},{num:1157,type:'regular'},
+      {num:2234,type:'regular'},{num:2220,type:'regular'},{num:1165,type:'regular'},
+      {num:1166,type:'regular'},{num:2222,type:'peak'},{num:2230,type:'peak'},
+      {num:2231,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'42', name:'Route 42', operator:'ftcc',
+    from:'Southern Central', to:'Rocky Road Bus Terminus',
+    via:'Sunshine Station, Central Hospital, Northern Interchange, North Island Estate',
+    journey:'19–25 min', fare:'$4.8', service:'06:00–23:00', interval:'10–30 min',
+    zone:'Zone 4', type:'inner',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'To Rocky Road', periods:[
+        {hours:'06:00–07:00',interval:'20–30 min'},
+        {hours:'07:00–09:00',interval:'10–15 min'},
+        {hours:'09:00–15:30',interval:'15–20 min'},
+        {hours:'15:30–19:00',interval:'10–15 min'},
+        {hours:'19:00–23:00',interval:'20–30 min'},
+      ]},
+      {dir:'To Southern Central', periods:[
+        {hours:'06:30–07:00',interval:'20–30 min'},
+        {hours:'07:00–09:00',interval:'10–15 min'},
+        {hours:'09:00–15:30',interval:'15–20 min'},
+        {hours:'15:30–19:00',interval:'10–15 min'},
+        {hours:'19:00–23:00',interval:'20–30 min'},
+      ]},
+    ],
+    stops:[
+      'Southern Central','Southern','Sunshine Station',
+      'Central Hospital','Maple Lane','Northern Interchange',
+      'North Island Estate Shopping Centre','North Island Estate - Rocky Tower',
+      'Rocky Road Bus Terminus'
+    ],
+    fleet:[
+      {num:3101,type:'regular'},{num:3103,type:'regular'},{num:3104,type:'regular'},
+      {num:3105,type:'regular'},{num:3110,type:'regular'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'42A', name:'Route 42A / 49A', operator:'ftcc',
+    from:'Rocky Road Bus Terminus', to:'Sunshine Pier',
+    via:'North Island Estate Shopping Centre, Northern Interchange, Central Hospital, Sunshine Station',
+    journey:'24 min', fare:'$5.4', service:'05:30–01:30', interval:'5–50 min',
+    zone:'Zone 4', type:'inner',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'To Sunshine Pier (42A)', periods:[
+        {hours:'05:30–07:00',interval:'10–20 min'},
+        {hours:'07:00–09:20',interval:'6–10 min'},
+        {hours:'09:20–15:30',interval:'10–20 min'},
+        {hours:'15:30–19:00',interval:'6–13 min'},
+        {hours:'19:00–22:00',interval:'10–20 min'},
+        {hours:'22:00–01:10',interval:'13–30 min'},
+      ]},
+      {dir:'To Rocky Road (42A)', periods:[
+        {hours:'05:40–07:00',interval:'10–20 min'},
+        {hours:'07:00–09:00',interval:'6–10 min'},
+        {hours:'09:00–15:30',interval:'10–20 min'},
+        {hours:'15:30–19:00',interval:'6–13 min'},
+        {hours:'19:00–22:00',interval:'10–20 min'},
+        {hours:'22:00–01:30',interval:'15–30 min'},
+      ]},
+    ],
+    stops:[
+      'Rocky Road Bus Terminus','North Island Hill Peak','North Island Hill',
+      'Downhill Estate','North Island Estate Shopping Centre',
+      'Panorama Heights','Northern Interchange','Central Hospital',
+      'Maple Lane','Sunshine Station','Southern','Sunshine Pier'
+    ],
+    fleet:[
+      {num:2213,type:'regular'},{num:3523,type:'regular'},{num:3524,type:'regular'},
+      {num:2218,type:'regular'},{num:3520,type:'regular'},{num:2219,type:'regular'},
+      {num:3528,type:'peak'},{num:3529,type:'peak'},{num:969,type:'additional_42A'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'46', name:'Route 46', operator:'ftcc',
+    from:'Lunar Point', to:'Eastmallow Praya Road',
+    via:'Moon Island West, Northern Interchange',
+    journey:'15–20 min', fare:'$3.6', service:'06:00–22:30', interval:'15–60 min',
+    zone:'Zone 4', type:'inner',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'Both Directions', periods:[
+        {hours:'06:00–07:20',interval:'30–60 min'},
+        {hours:'07:20–09:00',interval:'15–20 min'},
+        {hours:'09:00–15:30',interval:'30–60 min'},
+        {hours:'15:30–19:20',interval:'15–20 min'},
+        {hours:'19:20–22:30',interval:'30–60 min'},
+      ]},
+    ],
+    stops:[
+      'Lunar Point','Lunar Bay','Moon Island West','Eastmallow Estate',
+      'Eastmallow Praya Street','Northern Interchange','Eastmallow Praya Road'
+    ],
+    fleet:[
+      {num:3102,type:'regular'},{num:3109,type:'peak'},{num:3100,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'47', name:'Route 47', operator:'ftcc',
+    from:'Sun Central Street', to:'Norton Town Center',
+    via:'Southern, Eastmallow, Sunshine University, North Island Estate',
+    journey:'25–35 min', fare:'$6.1', service:'06:00–23:30', interval:'8–20 min',
+    zone:'Zone 4', type:'inner',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'To Norton Town Center', periods:[
+        {hours:'06:00–07:00',interval:'15–20 min'},
+        {hours:'07:00–09:00',interval:'8–12 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:30',interval:'15–20 min'},
+      ]},
+      {dir:'To Sun Central Street', periods:[
+        {hours:'06:00–07:00',interval:'15–20 min'},
+        {hours:'07:00–09:00',interval:'8–12 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:30',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Sun Central Street','Southern Central','Southern Market','Southern',
+      'Eastmallow Praya Road','Eastmallow Praya Street','Eastmallow Estate',
+      'Sunshine University','Panorama Heights','North Island Estate Shopping Centre',
+      'North Island Hill','Norton Garden','Norton Town Center'
+    ],
+    fleet:[
+      {num:2210,type:'regular'},{num:2211,type:'regular'},{num:2223,type:'regular'},
+      {num:2227,type:'regular'},{num:2229,type:'regular'},{num:2225,type:'regular'},
+      {num:2226,type:'regular'},{num:2232,type:'peak'},{num:2233,type:'peak'},
+      {num:2224,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'140', name:'Route 140 / 140P', operator:'ft',
+    from:'Long Island Ferry Pier', to:'Sunshine Pier',
+    via:'Long Island East, Dove Island, Western Harbour Tunnel Interchange, Northern Interchange, Central',
+    journey:'27–31 min', fare:'$11.4', service:'05:40–01:00', interval:'2–15 min',
+    zone:'Inter-zone (Zone 1 + Zone 4)', type:'interzone',
+    color:'#1A5276',
+    timetable:[
+      {dir:'To Sunshine Pier', periods:[
+        {hours:'05:40–07:00',interval:'5–10 min'},
+        {hours:'07:00–09:00',interval:'2–5 min'},
+        {hours:'09:00–15:30',interval:'5–8 min'},
+        {hours:'15:30–19:20',interval:'2–5 min'},
+        {hours:'19:20–22:00',interval:'5–8 min'},
+        {hours:'22:00–01:00',interval:'8–15 min'},
+      ]},
+      {dir:'To Long Island Ferry Pier', periods:[
+        {hours:'06:20–07:00',interval:'5–10 min'},
+        {hours:'07:00–09:00',interval:'2–5 min'},
+        {hours:'09:00–15:30',interval:'5–8 min'},
+        {hours:'15:30–19:20',interval:'2–5 min'},
+        {hours:'19:20–22:00',interval:'5–8 min'},
+        {hours:'22:00–01:00',interval:'8–15 min'},
+      ]},
+    ],
+    stops:[
+      'Long Island Ferry Pier','Long Island East','N Park',
+      'East Long Island Hospital','Dove Estate','Dove Hill',
+      'Timelapse Mall','Addi City','Western Harbour Tunnel Interchange',
+      'Northern Interchange','Central Hospital','Maple Lane',
+      'Sunshine Station','Southern','Sunshine Pier'
+    ],
+    fleet:[
+      {num:1018,type:'regular'},{num:1019,type:'regular'},{num:1020,type:'regular'},
+      {num:1021,type:'regular'},{num:1022,type:'regular'},{num:1034,type:'regular'},
+      {num:1036,type:'regular'},{num:1037,type:'regular'},{num:1038,type:'regular'},
+      {num:1039,type:'regular'},{num:1001,type:'regular'},{num:1002,type:'regular'},
+      {num:1003,type:'regular'},{num:1004,type:'regular'},{num:1005,type:'regular'},
+      {num:1006,type:'regular'},{num:1007,type:'regular'},{num:1008,type:'regular'},
+      {num:1009,type:'regular'},{num:1030,type:'regular'},{num:1000,type:'regular'},
+      {num:1017,type:'regular'},{num:1147,type:'regular'},{num:1160,type:'regular'},
+      {num:1161,type:'regular'},{num:1162,type:'regular'},{num:1180,type:'regular'},
+      {num:1181,type:'regular'},{num:959,type:'peak'},{num:960,type:'peak'},
+      {num:978,type:'peak'},{num:979,type:'peak'},{num:990,type:'peak'},
+      {num:1163,type:'peak'},{num:1148,type:'peak'},{num:1146,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'142', name:'Route 142', operator:'rebc',
+    from:'Dove Estate', to:'Sunshine Pier',
+    via:'Hospital Island, Western Harbour Tunnel Interchange, Sunshine Station, Central',
+    journey:'22–28 min', fare:'$8.2', service:'06:00–23:30', interval:'8–20 min',
+    zone:'Inter-zone (Zone 1 + Zone 4)', type:'interzone',
+    color:'#7B241C',
+    timetable:[
+      {dir:'Both Directions', periods:[
+        {hours:'06:00–07:00',interval:'15–20 min'},
+        {hours:'07:00–09:00',interval:'8–12 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:30',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Dove Estate','Dove Hill','Roblox HQ','Dove Fire Station',
+      'Hospital Island Praya Road','Timelapse Mall','Addi City',
+      'Western Harbour Tunnel Interchange','Northern Interchange',
+      'Central Hospital','Maple Lane','Sunshine Station','Southern','Sunshine Pier'
+    ],
+    fleet:[
+      {num:1183,type:'regular'},{num:1168,type:'regular'},{num:3107,type:'regular'},
+      {num:1167,type:'regular'},{num:1159,type:'regular'},
+      {num:2228,type:'peak'},{num:1169,type:'peak'},{num:1189,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'148', name:'Route 148 / 141P', operator:'ftcc',
+    from:'Norton Town Center', to:"Container's Island Bus Terminus",
+    via:'Rocky Road, North Island Estate, Northern Interchange, Western Harbour Tunnel, Dove Island',
+    journey:'30–40 min', fare:'$9.8', service:'05:30–23:30', interval:'8–20 min',
+    zone:'Inter-zone (Zone 1 + Zone 4)', type:'interzone',
+    color:'#1A8CB5',
+    timetable:[
+      {dir:'To Containers Island', periods:[
+        {hours:'05:30–07:00',interval:'12–15 min'},
+        {hours:'07:00–09:00',interval:'6–10 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:30',interval:'15–20 min'},
+      ]},
+      {dir:'To Norton Town Center', periods:[
+        {hours:'05:30–07:00',interval:'12–15 min'},
+        {hours:'07:00–09:00',interval:'6–10 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:30',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Norton Town Center','Norton Garden','North Island Estate Shopping Centre',
+      'Panorama Heights','Rocky Road Bus Terminus','Northern Interchange',
+      'Western Harbour Tunnel Interchange','Addi City','Timelapse Mall',
+      'Dove Fire Station','Roblox HQ','Dove Hill','Dove Estate',
+      "Container's Island Bus Terminus"
+    ],
+    fleet:[
+      {num:1176,type:'regular'},{num:1177,type:'regular'},{num:1178,type:'regular'},
+      {num:1179,type:'regular'},{num:1185,type:'regular'},{num:1186,type:'regular'},
+      {num:1173,type:'regular'},{num:1184,type:'regular'},{num:1175,type:'regular'},
+      {num:1149,type:'regular'},{num:1151,type:'regular'},{num:1152,type:'regular'},
+      {num:1174,type:'regular'},{num:1143,type:'regular'},
+      {num:1182,type:'peak'},{num:1153,type:'peak'},{num:1150,type:'peak'},
+      {num:970,type:'additional'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'171', name:'Route 171', operator:'ft',
+    from:'Long Island Ferry Pier', to:'Rainbow Estate Complex',
+    via:'Long Island, Zone 1, Central, Alexander, Zone 7 Interchange',
+    journey:'45–60 min', fare:'$14.2', service:'05:30–00:30', interval:'5–20 min',
+    zone:'Inter-zone (Zone 1 + 4 + 7)', type:'interzone',
+    color:'#1A5276',
+    timetable:[
+      {dir:'To Rainbow Estate Complex', periods:[
+        {hours:'05:30–07:00',interval:'10–15 min'},
+        {hours:'07:00–09:00',interval:'5–8 min'},
+        {hours:'09:00–15:30',interval:'8–12 min'},
+        {hours:'15:30–19:20',interval:'5–8 min'},
+        {hours:'19:20–22:00',interval:'8–12 min'},
+        {hours:'22:00–00:30',interval:'12–20 min'},
+      ]},
+      {dir:'To Long Island Ferry Pier', periods:[
+        {hours:'05:30–07:00',interval:'10–15 min'},
+        {hours:'07:00–09:00',interval:'5–8 min'},
+        {hours:'09:00–15:30',interval:'8–12 min'},
+        {hours:'15:30–19:20',interval:'5–8 min'},
+        {hours:'19:20–22:00',interval:'8–12 min'},
+        {hours:'22:00–00:30',interval:'12–20 min'},
+      ]},
+    ],
+    stops:[
+      'Long Island Ferry Pier','Long Island East','N Park',
+      'East Long Island Hospital','Western Harbour Tunnel Interchange',
+      'Northern Interchange','Central Hospital','Maple Lane',
+      'Southern Central','Southern','Bird Bridge',
+      'Zone 7 Interchange','Alexander','Alexander Shopping Centre',
+      'Mo Shopping Centre','East Door Estate','Rainbow Estate Complex'
+    ],
+    fleet:[
+      {num:1031,type:'regular'},{num:1032,type:'regular'},{num:1033,type:'regular'},
+      {num:1035,type:'regular'},{num:957,type:'regular'},{num:973,type:'regular'},
+      {num:968,type:'regular'},{num:980,type:'regular'},{num:983,type:'regular'},
+      {num:1023,type:'regular'},{num:984,type:'regular'},{num:1011,type:'regular'},
+      {num:1012,type:'regular'},{num:1013,type:'regular'},
+      {num:1028,type:'peak'},{num:1029,type:'peak'},{num:1024,type:'peak'},
+      {num:958,type:'peak'},{num:972,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'246X', name:'Route 246X', operator:'rebc',
+    from:'Eastmallow Praya Road', to:'Timelapse Mall (Circular)',
+    via:"Northern Plaza, Central, Container's Island (AM peak special)",
+    journey:'20–30 min', fare:'$7.5', service:'07:00–09:30', interval:'15–25 min',
+    zone:'Inter-zone (Zone 1 + Zone 4)', type:'interzone',
+    color:'#7B241C',
+    timetable:[
+      {dir:'Circular / AM Peak Special', periods:[
+        {hours:'07:00–09:30',interval:'15–25 min'},
+      ]},
+    ],
+    stops:[
+      'Eastmallow Praya Road','Eastmallow Praya Street','Northern Interchange',
+      'Northern Plaza','Maple Lane','Timelapse Mall','Addi City',
+      "Container's Island Bus Terminus"
+    ],
+    fleet:[
+      {num:1172,type:'peak'},{num:1170,type:'peak'},
+      {num:1171,type:'peak'},{num:3108,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'473', name:'Route 473', operator:'csb',
+    from:'Lunar Point', to:'Leafy Bay',
+    via:'YiYan Estate, YiYan, Zone 7 Interchange, Southern, Central, Northern Interchange',
+    journey:'16–27 min', fare:'$10.8', service:'06:00–23:00', interval:'8–20 min',
+    zone:'Inter-zone (Zone 4 + Zone 7)', type:'interzone',
+    color:'#1E8449',
+    timetable:[
+      {dir:'Both Directions', periods:[
+        {hours:'06:00–07:20',interval:'15–20 min'},
+        {hours:'07:20–09:00',interval:'8–12 min'},
+        {hours:'09:00–15:30',interval:'12–18 min'},
+        {hours:'15:30–19:20',interval:'8–12 min'},
+        {hours:'19:20–23:00',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Lunar Point','Lunar Bay','Northern Interchange','Central Hospital',
+      'Maple Lane','Southern','Southern Central','Bird Bridge',
+      'Zone 7 Interchange','YiYan Road','YiYan','YiYan Estate',
+      'Sindy Garden','Leafy Bay'
+    ],
+    fleet:[
+      {num:1142,type:'regular'},{num:1154,type:'regular'},{num:2217,type:'regular'},
+      {num:1187,type:'regular'},{num:1188,type:'regular'},{num:2214,type:'regular'},
+      {num:2215,type:'regular'},{num:2216,type:'regular'},{num:1145,type:'regular'},
+      {num:1140,type:'peak'},{num:1144,type:'peak'},{num:1141,type:'peak'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'S1S2', name:'Route S1 / S2', operator:'ft',
+    from:'Sun Central Street', to:'Circular Sightseeing',
+    via:'Northern Interchange, Long Island, Sunshine Pier, Southern',
+    journey:'45–60 min', fare:'$15.0', service:'S1: 09:00–18:00 | S2: 18:30–23:00', interval:'20–30 min',
+    zone:'Inter-zone Sightseeing', type:'special',
+    color:'#B7950B',
+    timetable:[
+      {dir:'S1 – Daytime (09:00–18:00)', periods:[
+        {hours:'09:00–18:00',interval:'20–30 min'},
+      ]},
+      {dir:'S2 – Evening (18:30–23:00)', periods:[
+        {hours:'18:30–23:00',interval:'20–30 min'},
+      ]},
+    ],
+    stops:[
+      'Sun Central Street','Sunshine Pier','Sunshine Station',
+      'Northern Interchange','Long Island Ferry Pier','Dove Estate',
+      'Southern','Sun Central Street'
+    ],
+    fleet:[
+      {num:7,type:'regular'},{num:8,type:'regular'},{num:9,type:'regular'},
+    ],
+    diversions:[],
+  },
+  {
+    id:'U47', name:'Route U47', operator:'ft',
+    from:'Hotel Symbol', to:'North Sunshine University',
+    via:'Sunshine University Southern Campus, Sunshine University Main Campus',
+    journey:'8–12 min', fare:'Free (students/staff)', service:'07:00–22:00', interval:'10–20 min',
+    zone:'Zone 4 – University Shuttle', type:'special',
+    color:'#5B2C6F',
+    timetable:[
+      {dir:'Both Directions', periods:[
+        {hours:'07:00–09:00',interval:'10 min'},
+        {hours:'09:00–15:30',interval:'15–20 min'},
+        {hours:'15:30–19:20',interval:'10 min'},
+        {hours:'19:20–22:00',interval:'15–20 min'},
+      ]},
+    ],
+    stops:[
+      'Hotel Symbol','Sunshine University (Main Campus)',
+      'X.Y.Zhen College','North Sunshine University'
+    ],
+    fleet:[
+      {num:7730,type:'regular'},{num:7732,type:'regular'},
+      {num:7733,type:'regular'},{num:7735,type:'regular'},
+      {num:7731,type:'additional'},{num:7734,type:'additional'},
+    ],
+    diversions:[],
+  },
+];
+
+// All stops combined (for selectors)
+const ALL_STOPS = [...new Set(ROUTES.flatMap(r=>r.stops))].sort();
+
+// State
+let state = {
+  currentAllocation: {}, // routeId -> [fleet nums]
+  diversions: [],
+  timetableOverrides: {},
+  thirdParty: { csb:[], hzii:[], rebc:[] },
+  currentDay: new Date().toDateString(),
+};
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('navClock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock,1000); updateClock();
+
+// ============================================================
+// PEAK HOURS CHECK
+// ============================================================
+function isPeakHour(date) {
+  date = date || new Date();
+  const h = date.getHours(), m = date.getMinutes();
+  const mins = h*60+m;
+  return (mins >= 7*60+20 && mins < 9*60) || (mins >= 15*60+30 && mins < 19*60+20);
+}
+
+// ============================================================
+// DAILY SHUFFLE
+// ============================================================
+function shuffleArray(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function initAllocation() {
+  // Seed by day so allocation is stable per day
+  const dayStr = new Date().toDateString();
+  const seed = dayStr.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  let rngState = seed;
+  function rng() { rngState = (rngState * 1664525 + 1013904223) & 0xFFFFFFFF; return (rngState >>> 0) / 0xFFFFFFFF; }
+  function seededShuffle(arr) {
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--) { const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  // Build pools by fleet series, shuffle within series
+  const fleetByRoute = {};
+  ROUTES.forEach(route => {
+    const byType = { regular:[], peak:[], additional:[] };
+    route.fleet.forEach(f => {
+      const type = f.type === 'additional' || f.type === 'additional_42A' ? 'additional' : f.type;
+      byType[type].push(f.num);
+    });
+    // Shuffle each type group within their fleet series
+    const shuffleGroup = (nums) => {
+      if(nums.length < 2) return nums;
+      const series = getFleetSeries(nums[0]);
+      // Get all buses in same series that are in this group
+      return seededShuffle(nums);
+    };
+    fleetByRoute[route.id] = {
+      regular: shuffleGroup(byType.regular),
+      peak: shuffleGroup(byType.peak),
+      additional: shuffleGroup(byType.additional),
+    };
+  });
+  state.currentAllocation = fleetByRoute;
+}
+
+// ============================================================
+// PAGES
+// ============================================================
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+
+  // Lazy init page content
+  if(id==='routes') renderRoutes();
+  if(id==='arrivals') initArrivals();
+  if(id==='planner') initPlanner();
+  if(id==='fleet') renderFleet('all');
+  if(id==='admin') renderAdmin();
+  if(id==='home') renderHome();
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function renderHome() {
+  // Stat: buses on duty
+  let totalBuses = 0;
+  const peak = isPeakHour();
+  ROUTES.forEach(r => {
+    const alloc = state.currentAllocation[r.id] || {};
+    totalBuses += (alloc.regular||[]).length + (peak ? (alloc.peak||[]).length : 0);
+  });
+  document.getElementById('statBuses').textContent = totalBuses;
+
+  const divCount = state.diversions.length;
+  document.getElementById('statDiversions').textContent = divCount;
+  document.getElementById('statOnTime').textContent = divCount === 0 ? '100%' : Math.round((1 - divCount/ROUTES.length)*100) + '%';
+
+  // Status banners
+  const sb = document.getElementById('statusBanners');
+  if(state.diversions.length === 0) {
+    sb.innerHTML = `<div class="status-banner" style="margin-bottom:16px">
+      <div class="status-dot green"></div>
+      <div class="status-text"><strong>All Services Operating Normally</strong> — No disruptions reported across the SIBS network</div>
+    </div>`;
+  } else {
+    sb.innerHTML = state.diversions.map(d=>`
+      <div class="status-banner" style="margin-bottom:8px">
+        <div class="status-dot ${d.type==='cancellation'?'red':'orange'}"></div>
+        <div class="status-text"><strong>Route ${d.route}</strong> — ${d.message}</div>
+      </div>`).join('');
+  }
+
+  // Home arrivals (first 5)
+  const now = new Date();
+  const homeArrivals = document.getElementById('homeArrivals');
+  const upcomingAll = [];
+  ROUTES.slice(0,6).forEach(route => {
+    const mins = getNextBusMins(route, now);
+    const alloc = state.currentAllocation[route.id] || {};
+    const buses = alloc.regular || [];
+    upcomingAll.push({ route, mins, bus: buses[0] });
+  });
+  upcomingAll.sort((a,b)=>a.mins-b.mins);
+  homeArrivals.innerHTML = upcomingAll.slice(0,5).map(({route,mins,bus})=>`
+    <div class="arrivals-row" style="color:#ccc;background:var(--text);border-radius:6px;margin-bottom:4px;font-size:12px;display:grid;grid-template-columns:60px 1fr 70px 80px;gap:8px;padding:8px 12px;align-items:center">
+      <span class="route-tag ${route.operator}">${route.id}</span>
+      <span style="color:#fff;font-weight:600;font-size:12px">${route.to}</span>
+      <span style="color:var(--yellow);font-weight:800">${mins===0?'Now':`${mins} min`}</span>
+      <span style="color:rgba(255,255,255,0.5);font-size:11px">${bus ? `#${bus} ${FLEET_MASTER[bus]||''}` : '—'}</span>
+    </div>`).join('');
+
+  // Notices
+  const hn = document.getElementById('homeNotices');
+  if(state.diversions.length===0) {
+    hn.innerHTML = `<div class="empty-state" style="padding:20px"><div class="big" style="font-size:28px">✅</div><p>No active service notices</p></div>`;
+  } else {
+    hn.innerHTML = state.diversions.map(d=>`
+      <div class="diversion-banner">
+        <div class="diversion-icon">${d.type==='cancellation'?'🚫':d.type==='delay'?'⏱️':'⚠️'}</div>
+        <div class="diversion-text">
+          <strong>Route ${d.route} – ${d.type.charAt(0).toUpperCase()+d.type.slice(1)}</strong>
+          ${d.message}
+          ${d.stops ? `<div class="mt-4" style="color:var(--text-muted)">Affected: ${d.stops}</div>` : ''}
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ============================================================
+// ROUTES
+// ============================================================
+function renderRoutes(filter='',opFilter='') {
+  const list = document.getElementById('routeList');
+  let routes = ROUTES;
+  if(filter) {
+    const f = filter.toLowerCase();
+    routes = routes.filter(r =>
+      r.id.toLowerCase().includes(f) ||
+      r.name.toLowerCase().includes(f) ||
+      r.from.toLowerCase().includes(f) ||
+      r.to.toLowerCase().includes(f) ||
+      r.via.toLowerCase().includes(f) ||
+      r.stops.some(s=>s.toLowerCase().includes(f))
+    );
+  }
+  if(opFilter) routes = routes.filter(r=>r.operator===opFilter);
+
+  if(routes.length===0) {
+    list.innerHTML = `<div class="empty-state"><div class="big">🔍</div><p>No routes match your search</p></div>`;
+    return;
+  }
+
+  list.innerHTML = routes.map(r => {
+    const hasDiversion = state.diversions.some(d=>d.route===r.id);
+    const alloc = state.currentAllocation[r.id] || {};
+    const activeBuses = (alloc.regular||[]).length;
+    const peakBuses = (alloc.peak||[]).length;
+    return `
+    <div class="route-item" onclick="openRouteModal('${r.id}')">
+      <span class="route-tag ${r.operator}" style="font-size:15px;padding:6px 10px">${r.id}</span>
+      <div class="route-meta">
+        <div class="route-name">${r.from} ↔ ${r.to}</div>
+        <div class="route-via">via ${r.via}</div>
+        <div class="route-info">
+          <span class="pill fare">💵 ${r.fare}</span>
+          <span class="pill time">⏱ ${r.journey}</span>
+          <span class="pill service">🕐 ${r.service}</span>
+          <span class="op-badge ${r.operator}">${r.operator.toUpperCase()}</span>
+          <span class="text-muted">${activeBuses} buses${peakBuses>0?' +'+peakBuses+' peak':''}</span>
+          ${hasDiversion ? '<span style="color:var(--orange);font-size:11px;font-weight:700">⚠️ Notice</span>' : ''}
+        </div>
+      </div>
+      <div style="color:var(--text-muted);font-size:18px">›</div>
+    </div>`;
+  }).join('');
+}
+
+function filterRoutes() {
+  const q = document.getElementById('routeSearch').value;
+  const op = document.getElementById('opFilter').value;
+  renderRoutes(q, op);
+}
+
+// ============================================================
+// ROUTE MODAL
+// ============================================================
+function openRouteModal(id) {
+  const route = ROUTES.find(r=>r.id===id);
+  if(!route) return;
+
+  const diversion = state.diversions.filter(d=>d.route===id);
+  const alloc = state.currentAllocation[id] || {};
+  const peak = isPeakHour();
+  const now = new Date();
+  const nextMins = getNextBusMins(route, now);
+
+  // Stops with estimated times
+  const baseTime = new Date(now.getTime() + nextMins*60000);
+  const stopInterval = parseInt(route.journey) / (route.stops.length - 1);
+
+  document.getElementById('routeModalHeader').innerHTML = `
+    <span class="route-tag ${route.operator}" style="font-size:18px;padding:8px 14px">${route.id}</span>
+    <div>
+      <div style="font-weight:800;font-size:16px">${route.name}</div>
+      <div style="color:var(--text-muted);font-size:12px">${route.zone} · ${route.operator.toUpperCase()}</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  `;
+
+  let stopsHtml = route.stops.map((stop,i) => {
+    const t = new Date(baseTime.getTime() + i*stopInterval*60000);
+    const h = String(t.getHours()).padStart(2,'0');
+    const m = String(t.getMinutes()).padStart(2,'0');
+    const isDelay = Math.random() < 0.15;
+    const delayMin = isDelay ? Math.floor(Math.random()*4)+1 : 0;
+    return `
+    <div class="stop-row">
+      <div class="stop-num">${i+1}</div>
+      <div class="stop-name">${stop}</div>
+      <div class="stop-time">${h}:${m}</div>
+      ${delayMin>0 ? `<div class="stop-delay">+${delayMin} min</div>` : ''}
+    </div>`;
+  }).join('');
+
+  let fleetHtml = '';
+  ['regular','peak','additional'].forEach(type => {
+    const buses = alloc[type] || [];
+    if(buses.length===0) return;
+    const label = type==='regular' ? '🚌 Regular Allocation' : type==='peak' ? '⏰ Peak Hours Only' : '➕ Additional (Peak)';
+    const show = type==='peak'||type==='additional' ? peak : true;
+    fleetHtml += `<div class="section-divider">${label}</div>`;
+    fleetHtml += `<div class="fleet-grid">` + buses.map(num => `
+      <div class="fleet-card" style="${!show?'opacity:0.4':''}">
+        <div class="fleet-num">#${num}</div>
+        <div class="fleet-reg">${FLEET_MASTER[num]||'—'}</div>
+        <div class="fleet-route">${show?'On duty':'Off duty'}</div>
+      </div>`).join('') + `</div>`;
+  });
+
+  let ttHtml = route.timetable.map(tt => `
+    <div style="margin-bottom:16px">
+      <div style="font-weight:700;margin-bottom:8px;font-size:13px">${tt.dir}</div>
+      ${tt.periods.map(p=>`
+        <div class="tt-period">
+          <span>${p.hours}</span>
+          <span class="tt-interval">${p.interval}</span>
+        </div>`).join('')}
+    </div>`).join('');
+
+  let divHtml = diversion.length > 0 ? diversion.map(d=>`
+    <div class="diversion-banner">
+      <div class="diversion-icon">⚠️</div>
+      <div class="diversion-text">
+        <strong>${d.type.charAt(0).toUpperCase()+d.type.slice(1)}</strong>
+        ${d.message}
+        ${d.stops ? `<div class="mt-4 text-muted">Affected stops: ${d.stops}</div>` : ''}
+      </div>
+    </div>`).join('') : '';
+
+  document.getElementById('routeModalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="stat-card"><div class="stat-num" style="font-size:20px">${route.fare}</div><div class="stat-label">Full Fare</div></div>
+      <div class="stat-card"><div class="stat-num" style="font-size:20px">${nextMins===0?'Now':nextMins+' min'}</div><div class="stat-label">Next Bus</div></div>
+    </div>
+    <div style="margin-bottom:8px"><strong>🚌 Route:</strong> ${route.from} → ${route.to}</div>
+    <div style="margin-bottom:8px"><strong>📍 Via:</strong> ${route.via}</div>
+    <div style="margin-bottom:16px"><strong>⏱ Journey:</strong> ${route.journey} · <strong>🕐 Service:</strong> ${route.service} · <strong>Interval:</strong> ${route.interval}</div>
+    ${divHtml}
+    <div class="section-divider">📍 Stops & Estimated Arrivals (Next Bus)</div>
+    ${stopsHtml}
+    <div class="section-divider">📋 Timetable</div>
+    ${ttHtml}
+    <div class="section-divider">🚌 Today's Fleet</div>
+    ${fleetHtml}
+  `;
+
+  document.getElementById('routeModal').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if(!e || e.target===document.getElementById('routeModal')) {
+    document.getElementById('routeModal').style.display = 'none';
+  }
+}
+
+// ============================================================
+// ARRIVALS
+// ============================================================
+function initArrivals() {
+  // Populate stop selector
+  const sel = document.getElementById('stopSelector');
+  if(sel.options.length <= 1) {
+    ALL_STOPS.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+  }
+  // Route filter
+  const rf = document.getElementById('arrRouteFilter');
+  if(rf.options.length <= 1) {
+    ROUTES.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.id; o.textContent = r.id + ' – ' + r.to;
+      rf.appendChild(o);
+    });
+  }
+}
+
+function getNextBusMins(route, now) {
+  // Determine interval based on time of day
+  const h = now.getHours(), m = now.getMinutes();
+  const mins = h*60+m;
+  let interval = 15; // default
+  const peak = isPeakHour(now);
+  if(peak) interval = 6;
+  else if(mins < 7*60) interval = 15;
+  else interval = 12;
+
+  // Next bus based on interval from last departure
+  const startMins = 5*60+30; // 05:30
+  const elapsed = mins - startMins;
+  if(elapsed < 0) return startMins - mins;
+  const remainder = elapsed % interval;
+  return remainder === 0 ? 0 : interval - remainder;
+}
+
+function updateArrivals() {
+  const stop = document.getElementById('stopSelector').value;
+  const routeFilter = document.getElementById('arrRouteFilter').value;
+  if(!stop) return;
+
+  const now = new Date();
+  const wrap = document.getElementById('arrivalsBoardWrap');
+
+  // Find routes serving this stop
+  let servingRoutes = ROUTES.filter(r => r.stops.includes(stop));
+  if(routeFilter) servingRoutes = servingRoutes.filter(r=>r.id===routeFilter);
+
+  if(servingRoutes.length===0) {
+    wrap.innerHTML = `<div class="empty-state"><div class="big">🚏</div><p>No routes serve this stop</p></div>`;
+    return;
+  }
+
+  // Build arrivals
+  const arrivals = [];
+  servingRoutes.forEach(route => {
+    const diversion = state.diversions.find(d=>d.route===route.id);
+    const alloc = state.currentAllocation[route.id] || {};
+    const peak = isPeakHour(now);
+
+    // Both directions
+    [route.from, route.to].forEach(dest => {
+      if(dest === stop) return;
+      const stopIdx = route.stops.indexOf(stop);
+      const baseNextMins = getNextBusMins(route, now);
+      const travelToStop = stopIdx * (parseInt(route.journey) / (route.stops.length-1));
+
+      // Show next 3 departures
+      for(let i=0;i<3;i++) {
+        const minsAway = Math.round(baseNextMins + travelToStop + i*getNextBusMins(route,now)*2);
+        const buses = alloc.regular || [];
+        const bus = buses[i % (buses.length||1)];
+        const arrTime = new Date(now.getTime() + minsAway*60000);
+        const hh = String(arrTime.getHours()).padStart(2,'0');
+        const mm = String(arrTime.getMinutes()).padStart(2,'0');
+
+        // Delay simulation
+        const divertedStop = diversion && diversion.stops && diversion.stops.includes(stop);
+        const delayed = divertedStop || Math.random() < 0.1;
+        const delayMins = delayed ? Math.floor(Math.random()*5)+1 : 0;
+
+        arrivals.push({
+          route, dest, minsAway, hh, mm, bus, delayed, delayMins, diversion
+        });
+      }
+    });
+  });
+
+  arrivals.sort((a,b)=>a.minsAway-b.minsAway);
+
+  wrap.innerHTML = `
+    <div class="arrivals-board">
+      <div class="arrivals-header">
+        <span>🚏 ${stop}</span>
+        <span style="font-weight:400;font-size:11px">Updated ${new Date().toLocaleTimeString()}</span>
+      </div>
+      <div class="arrivals-cols">
+        <div class="arrivals-col-label">Route</div>
+        <div class="arrivals-col-label">Destination</div>
+        <div class="arrivals-col-label">Arrives</div>
+        <div class="arrivals-col-label">Fleet</div>
+        <div class="arrivals-col-label">Status</div>
+      </div>
+      ${arrivals.slice(0,12).map(a=>`
+        <div class="arrivals-row">
+          <span class="route-tag ${a.route.operator}">${a.route.id}</span>
+          <span class="arr-dest">${a.dest}</span>
+          <span class="arr-time">${a.minsAway===0?'NOW':a.minsAway+' min'}</span>
+          <span class="arr-fleet">${a.bus ? '#'+a.bus+' '+((FLEET_MASTER[a.bus]||'').substring(0,6)) : '—'}</span>
+          <span class="arr-status ${a.delayed?'delayed':'on-time'}">${a.delayed?`+${a.delayMins}min delay`:'On time'}</span>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+// Auto-refresh arrivals
+setInterval(()=>{ if(document.getElementById('page-arrivals').classList.contains('active')) updateArrivals(); }, 30000);
+
+// ============================================================
+// JOURNEY PLANNER
+// ============================================================
+function initPlanner() {
+  const from = document.getElementById('planFrom');
+  const to = document.getElementById('planTo');
+  if(from.options.length <= 1) {
+    ALL_STOPS.forEach(s => {
+      [from,to].forEach(sel => {
+        const o = document.createElement('option');
+        o.value = s; o.textContent = s;
+        sel.appendChild(o);
+      });
+    });
+  }
+}
+
+function swapStops() {
+  const f = document.getElementById('planFrom');
+  const t = document.getElementById('planTo');
+  const tmp = f.value; f.value = t.value; t.value = tmp;
+}
+
+function planJourney() {
+  const from = document.getElementById('planFrom').value;
+  const to = document.getElementById('planTo').value;
+  const results = document.getElementById('planResults');
+
+  if(!from || !to) {
+    results.innerHTML = `<div class="card"><p class="text-muted">Please select both an origin and a destination.</p></div>`;
+    return;
+  }
+  if(from===to) {
+    results.innerHTML = `<div class="card"><p class="text-muted">Origin and destination are the same stop.</p></div>`;
+    return;
+  }
+
+  const options = [];
+
+  // Find direct routes
+  ROUTES.forEach(route => {
+    const fi = route.stops.indexOf(from);
+    const ti = route.stops.indexOf(to);
+    if(fi >= 0 && ti >= 0 && fi !== ti) {
+      const stops = Math.abs(ti - fi);
+      const journeyMins = Math.round(stops * parseInt(route.journey) / (route.stops.length-1));
+      const fare = parseFloat(route.fare.replace('$',''));
+      options.push({
+        type:'direct',
+        routes:[route],
+        stops: [from, to],
+        totalMins: journeyMins,
+        totalFare: fare,
+        transfers: 0,
+        label: `${route.id}: ${from} → ${to}`,
+      });
+    }
+  });
+
+  // Find 1-transfer options via interchange stops
+  const interchanges = ['Northern Interchange','Sunshine Station','Zone 7 Interchange',
+    'Western Harbour Tunnel Interchange','Central Hospital','Southern Central',
+    'Long Island Ferry Pier','Norton Town Center'];
+
+  interchanges.forEach(interchange => {
+    ROUTES.forEach(r1 => {
+      const fi = r1.stops.indexOf(from);
+      const ii1 = r1.stops.indexOf(interchange);
+      if(fi < 0 || ii1 < 0) return;
+      ROUTES.forEach(r2 => {
+        if(r1.id===r2.id) return;
+        const ii2 = r2.stops.indexOf(interchange);
+        const ti = r2.stops.indexOf(to);
+        if(ii2 < 0 || ti < 0) return;
+        const stops1 = Math.abs(ii1 - fi);
+        const stops2 = Math.abs(ti - ii2);
+        const mins1 = Math.round(stops1 * parseInt(r1.journey) / (r1.stops.length-1));
+        const mins2 = Math.round(stops2 * parseInt(r2.journey) / (r2.stops.length-1));
+        const fare1 = parseFloat(r1.fare.replace('$',''));
+        const fare2 = parseFloat(r2.fare.replace('$',''));
+        // BBI discount (10% at interchange)
+        const totalFare = parseFloat((fare1 + fare2 * 0.9).toFixed(1));
+        options.push({
+          type:'transfer',
+          routes:[r1,r2],
+          stops:[from, interchange, to],
+          totalMins: mins1 + 5 + mins2, // 5 min transfer
+          totalFare,
+          transfers:1,
+          label:`${r1.id} → change at ${interchange} → ${r2.id}`,
+          interchange,
+        });
+      });
+    });
+  });
+
+  // Deduplicate and sort
+  const seen = new Set();
+  const unique = options.filter(o => {
+    const key = o.label;
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+
+  if(unique.length===0) {
+    results.innerHTML = `<div class="card"><div class="empty-state"><div class="big">🗺️</div><p>No routes found between these stops.<br>Try selecting stops on the same or connecting routes.</p></div></div>`;
+    return;
+  }
+
+  const sorted = unique.sort((a,b)=>a.totalMins-b.totalMins);
+  const fastest = sorted[0];
+  const cheapest = [...unique].sort((a,b)=>a.totalFare-b.totalFare)[0];
+  const directs = unique.filter(o=>o.type==='direct');
+
+  results.innerHTML = `
+    <div class="card">
+      <div class="card-title"><div class="icon">📍</div> ${unique.length} option${unique.length!==1?'s':''} found: ${from} → ${to}</div>
+      ${sorted.slice(0,6).map((opt,i)=>{
+        const isFastest = opt===fastest;
+        const isCheapest = opt===cheapest;
+        const isDirect = opt.type==='direct';
+        const badges = [];
+        if(isFastest) badges.push('<span class="journey-badge fastest">Fastest</span>');
+        if(isCheapest && opt!==fastest) badges.push('<span class="journey-badge cheapest">Cheapest</span>');
+        if(isDirect) badges.push('<span class="journey-badge direct">Direct</span>');
+        return `
+        <div class="journey-option ${i===0?'best':''}">
+          <div>${badges.join(' ')}</div>
+          <div class="journey-steps">
+            <strong>${opt.stops[0]}</strong>
+            ${opt.routes.map((r,ri)=>`
+              <span class="journey-arrow">→</span>
+              <span class="route-tag ${r.operator}" style="font-size:11px;padding:2px 7px">${r.id}</span>
+              ${opt.stops[ri+1]?`<span class="journey-arrow">→</span><strong>${opt.stops[ri+1]}</strong>`:''}
+            `).join('')}
+          </div>
+          ${opt.transfers>0 ? `<div class="text-muted mt-4">🔄 Change at ${opt.interchange} (approx. 5 min wait)</div>` : ''}
+          <div class="journey-footer">
+            <span>⏱ <strong>${opt.totalMins} min</strong></span>
+            <span>💵 <strong>$${opt.totalFare}</strong></span>
+            <span>🚌 <strong>${opt.transfers===0?'Direct':'1 transfer'}</strong></span>
+            ${opt.transfers>0?'<span class="text-muted">BBI interchange discount applied</span>':''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ============================================================
+// FLEET
+// ============================================================
+function showFleetTab(routeId, btn) {
+  document.querySelectorAll('#fleetTabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderFleet(routeId);
+}
+
+function renderFleet(routeId) {
+  const display = document.getElementById('fleetDisplay');
+  const peak = isPeakHour();
+
+  let routes = routeId === 'all' ? ROUTES : ROUTES.filter(r=>r.id===routeId);
+  if(routes.length===0) { display.innerHTML=''; return; }
+
+  display.innerHTML = routes.map(route => {
+    const alloc = state.currentAllocation[route.id] || {};
+
+    const renderBuses = (buses, type) => {
+      if(!buses||buses.length===0) return '';
+      const active = type==='regular' || (peak && (type==='peak'||type==='additional'));
+      return buses.map(num=>`
+        <div class="fleet-card" style="${!active?'opacity:0.4;background:#f5f5f5':''}">
+          <div class="fleet-num">#${num}</div>
+          <div class="fleet-reg">${FLEET_MASTER[num]||'—'}</div>
+          <div class="fleet-route">${active?'<span style="color:var(--green);font-weight:700">On duty</span>':'<span style="color:var(--text-muted)">Off duty</span>'}</div>
+        </div>`).join('');
+    };
+
+    return `
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="route-tag ${route.operator}" style="font-size:15px">${route.id}</span>
+        <span style="font-weight:700">${route.from} ↔ ${route.to}</span>
+        <span class="op-badge ${route.operator}">${route.operator.toUpperCase()}</span>
+      </div>
+      <div class="section-divider">Regular Allocation</div>
+      <div class="fleet-grid">${renderBuses(alloc.regular,'regular')}</div>
+      ${(alloc.peak||[]).length>0?`<div class="section-divider">Peak Hours Only <span class="badge-peak">07:20–09:00 / 15:30–19:20</span></div><div class="fleet-grid">${renderBuses(alloc.peak,'peak')}</div>`:''}
+      ${(alloc.additional||[]).length>0?`<div class="section-divider">Additional <span class="badge-additional">Peak demand</span></div><div class="fleet-grid">${renderBuses(alloc.additional,'additional')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function showAdminTab(tab, btn) {
+  ['allocation','diversions','operators','timetable'].forEach(t => {
+    document.getElementById('admin-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('#page-admin .tabs:first-of-type .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showOpTab(op, btn) {
+  ['csb','hzii','rebc'].forEach(o=>{
+    document.getElementById('op-'+o).style.display=o===op?'block':'none';
+  });
+  btn.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderOpTable(op);
+}
+
+function renderAdmin() {
+  renderAllocationTable();
+  renderDiversionList();
+  renderOpTable('csb');
+  renderTimetableOverrides();
+  // Populate diversion route selector
+  const divRoute = document.getElementById('divRoute');
+  if(divRoute.options.length <= 1) {
+    ROUTES.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.id; o.textContent = r.id + ' – ' + r.name;
+      divRoute.appendChild(o);
+    });
+  }
+}
+
+function renderAllocationTable() {
+  const wrap = document.getElementById('allocationTable');
+  wrap.innerHTML = ROUTES.map(route => {
+    const alloc = state.currentAllocation[route.id] || {};
+    return `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span class="route-tag ${route.operator}">${route.id}</span>
+        <span style="font-weight:700;flex:1">${route.from} ↔ ${route.to}</span>
+        <button class="btn btn-ghost btn-sm" onclick="reshuffleRoute('${route.id}')">🔀 Reshuffle</button>
+      </div>
+      ${renderAllocGroup(route.id, alloc.regular||[], 'regular', 'Regular')}
+      ${(route.fleet.some(f=>f.type==='peak')) ? renderAllocGroup(route.id, alloc.peak||[], 'peak', 'Peak-Hour (S)') : ''}
+      ${(route.fleet.some(f=>f.type==='additional'||f.type==='additional_42A')) ? renderAllocGroup(route.id, alloc.additional||[], 'additional', 'Additional (A)') : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderAllocGroup(routeId, buses, type, label) {
+  if(buses.length===0) return '';
+  return `
+  <div style="margin-top:8px">
+    <div class="text-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px">${label} Allocation</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${buses.map((num,i)=>`
+        <div style="display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px">
+          <span style="font-size:11px;color:var(--text-muted)">Bus ${i+1}</span>
+          <select class="inline-edit-input" style="width:160px" onchange="changeBusAllocation('${routeId}','${type}',${i},this.value)">
+            ${getEligibleBuses(num).map(n=>`<option value="${n}" ${n===num?'selected':''}>#${n} ${FLEET_MASTER[n]||''}</option>`).join('')}
+          </select>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function getEligibleBuses(fleetNum) {
+  const series = getFleetSeries(fleetNum);
+  if(!series) return [fleetNum];
+  return Object.keys(FLEET_MASTER).filter(n => getFleetSeries(n)===series).map(Number).sort((a,b)=>a-b);
+}
+
+function changeBusAllocation(routeId, type, idx, newVal) {
+  const alloc = state.currentAllocation[routeId] || {};
+  const group = [...(alloc[type]||[])];
+  const newNum = parseInt(newVal);
+
+  // Check not already used
+  let conflict = null;
+  ROUTES.forEach(r => {
+    if(r.id===routeId) return;
+    const a = state.currentAllocation[r.id] || {};
+    ['regular','peak','additional'].forEach(t => {
+      if((a[t]||[]).includes(newNum)) conflict = r.id;
+    });
+  });
+
+  if(conflict) {
+    alert(`Bus #${newNum} is already allocated to Route ${conflict}. Please swap it first.`);
+    return;
+  }
+
+  group[idx] = newNum;
+  state.currentAllocation[routeId] = { ...alloc, [type]: group };
+}
+
+function reshuffleRoute(routeId) {
+  const route = ROUTES.find(r=>r.id===routeId);
+  if(!route) return;
+  const byType = { regular:[], peak:[], additional:[] };
+  route.fleet.forEach(f => {
+    const t = f.type === 'additional_42A' ? 'additional' : f.type;
+    byType[t].push(f.num);
+  });
+  state.currentAllocation[routeId] = {
+    regular: shuffleArray(byType.regular),
+    peak: shuffleArray(byType.peak),
+    additional: shuffleArray(byType.additional),
+  };
+  renderAllocationTable();
+}
+
+function reshuffleAll() {
+  if(!confirm('Reshuffle all bus allocations for a new day? This simulates the daily reshuffle.')) return;
+  ROUTES.forEach(route => {
+    const byType = { regular:[], peak:[], additional:[] };
+    route.fleet.forEach(f => {
+      const t = f.type === 'additional_42A' ? 'additional' : f.type;
+      byType[t].push(f.num);
+    });
+    state.currentAllocation[route.id] = {
+      regular: shuffleArray(byType.regular),
+      peak: shuffleArray(byType.peak),
+      additional: shuffleArray(byType.additional),
+    };
+  });
+  renderAllocationTable();
+  alert('✅ All allocations reshuffled for the new day!');
+}
+
+function resetToDefault() {
+  if(!confirm('Reset all allocations to their default (as-listed) order?')) return;
+  initAllocation();
+  renderAllocationTable();
+}
+
+// ============================================================
+// DIVERSIONS
+// ============================================================
+function addDiversion() {
+  const route = document.getElementById('divRoute').value;
+  const type = document.getElementById('divType').value;
+  const message = document.getElementById('divMessage').value.trim();
+  const stops = document.getElementById('divStops').value.trim();
+
+  if(!route || !message) { alert('Please select a route and enter a notice message.'); return; }
+
+  state.diversions.push({ route, type, message, stops, id: Date.now() });
+  renderDiversionList();
+  document.getElementById('divMessage').value = '';
+  document.getElementById('divStops').value = '';
+}
+
+function removeDiversion(id) {
+  state.diversions = state.diversions.filter(d=>d.id!==id);
+  renderDiversionList();
+}
+
+function renderDiversionList() {
+  const wrap = document.getElementById('diversionList');
+  if(state.diversions.length===0) {
+    wrap.innerHTML = `<div class="empty-state"><div class="big">✅</div><p>No active diversion notices</p></div>`;
+    return;
+  }
+  wrap.innerHTML = state.diversions.map(d=>`
+    <div class="diversion-banner" style="margin-bottom:8px">
+      <div class="diversion-icon">${d.type==='cancellation'?'🚫':d.type==='delay'?'⏱️':d.type==='extra'?'➕':'⚠️'}</div>
+      <div class="diversion-text" style="flex:1">
+        <strong>Route ${d.route} – ${d.type.charAt(0).toUpperCase()+d.type.slice(1)}</strong>
+        ${d.message}
+        ${d.stops ? `<div class="mt-4 text-muted">Affected stops: ${d.stops}</div>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeDiversion(${d.id})">Remove</button>
+    </div>`).join('');
+}
+
+// ============================================================
+// THIRD PARTY OPERATORS
+// ============================================================
+function renderOpTable(op) {
+  const wrap = document.getElementById(op+'Table');
+  const data = state.thirdParty[op] || [];
+
+  const addRow = () => {
+    state.thirdParty[op] = state.thirdParty[op] || [];
+    state.thirdParty[op].push({ fleet:'', reg:'', route:'', service:'', notes:'' });
+    renderOpTable(op);
+  };
+
+  wrap.innerHTML = `
+    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <span class="text-muted">${data.length} bus${data.length!==1?'es':''} entered</span>
+      <button class="btn btn-primary btn-sm" onclick="(${addRow.toString()})()">+ Add Bus</button>
+    </div>
+    <table class="admin-table">
+      <thead><tr>
+        <th>Fleet #</th><th>Registration</th><th>Route</th><th>Service Hours</th><th>Notes</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${data.length===0 ? `<tr><td colspan="6" class="text-center text-muted" style="padding:20px">No ${op.toUpperCase()} buses entered yet. Click "+ Add Bus" to begin.</td></tr>` :
+          data.map((row,i)=>`
+          <tr>
+            <td><input class="inline-edit-input" value="${row.fleet}" placeholder="e.g. 4001" oninput="updateOpRow('${op}',${i},'fleet',this.value)" style="width:80px"/></td>
+            <td><input class="inline-edit-input" value="${row.reg}" placeholder="MM0001" oninput="updateOpRow('${op}',${i},'reg',this.value)" style="width:100px"/></td>
+            <td><input class="inline-edit-input" value="${row.route}" placeholder="e.g. 473" oninput="updateOpRow('${op}',${i},'route',this.value)" style="width:70px"/></td>
+            <td><input class="inline-edit-input" value="${row.service}" placeholder="e.g. 06:00–23:00" oninput="updateOpRow('${op}',${i},'service',this.value)" style="width:140px"/></td>
+            <td><input class="inline-edit-input" value="${row.notes}" placeholder="Notes…" oninput="updateOpRow('${op}',${i},'notes',this.value)" style="width:160px"/></td>
+            <td><button class="btn btn-danger btn-sm" onclick="removeOpRow('${op}',${i})">✕</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function updateOpRow(op, i, field, val) {
+  if(!state.thirdParty[op]) state.thirdParty[op]=[];
+  if(!state.thirdParty[op][i]) state.thirdParty[op][i]={};
+  state.thirdParty[op][i][field] = val;
+}
+
+function removeOpRow(op, i) {
+  state.thirdParty[op].splice(i,1);
+  renderOpTable(op);
+}
+
+// ============================================================
+// TIMETABLE OVERRIDES
+// ============================================================
+function renderTimetableOverrides() {
+  const wrap = document.getElementById('timetableOverrideList');
+  wrap.innerHTML = ROUTES.map(route => {
+    const ov = state.timetableOverrides[route.id] || {};
+    return `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span class="route-tag ${route.operator}">${route.id}</span>
+        <span style="font-weight:700;flex:1">${route.name}</span>
+        <span class="text-muted">Normal interval: ${route.interval}</span>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="form-group">
+          <label class="form-label">Override Interval</label>
+          <input class="form-input" style="width:160px" value="${ov.interval||''}" placeholder="e.g. 10–15 min"
+            oninput="state.timetableOverrides['${route.id}'] = {...(state.timetableOverrides['${route.id}']||{}), interval:this.value}"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <input class="form-input" style="width:220px" value="${ov.note||''}" placeholder="Reason for change…"
+            oninput="state.timetableOverrides['${route.id}'] = {...(state.timetableOverrides['${route.id}']||{}), note:this.value}"/>
+        </div>
+        ${ov.interval ? `<span class="pill" style="background:#FEF3C7;color:#92400E;align-self:flex-end;margin-bottom:2px">Override active</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initAllocation();
+renderHome();
+initArrivals();
+initPlanner();
+
+// Auto-refresh home every 60s
+setInterval(()=>{
+  if(document.getElementById('page-home').classList.contains('active')) renderHome();
+}, 60000);
+</script>
+</body>
+</html>
